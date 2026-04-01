@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #E4002B;
+  --text-dark: #1A1A1A;
+  --text-body: #333333;
+  --text-muted: #666666;
+  --text-light: #999999;
+  --bg-white: #FFFFFF;
+  --bg-gray: #F5F5F5;
+  --border: #EEEEEE;
+  --border-dark: #E5E5E5;
+}
+
+body {
+  background: #fafafa;
+  color: #1A1A1A;
+}
+
+/* Hide scrollbar on category tabs */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Line clamp for item names */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Header B logo hover — grayscale to color sweep left-to-right */
+.logo-hover-sweep {
+  filter: grayscale(100%);
+  transition: filter 0.6s ease;
+  position: relative;
+}
+.logo-hover-sweep:hover {
+  filter: grayscale(0%);
+}
+
+/* Header B gradient line animation */
+.gradient-line-animate {
+  background-size: 200% 100%;
+  animation: gradientSlide 3s ease infinite;
+}
+@keyframes gradientSlide {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Header B sign-in pill hover */
+.pill-hover {
+  transition: all 0.3s ease;
+}
+.pill-hover:hover {
+  background-color: #E4002B;
+  border-color: #E4002B;
+  color: #FFFFFF;
+}
+
+/* Skeleton loading animation */
+@keyframes shimmer {
+  0% { background-color: #F5F5F5; }
+  50% { background-color: #EBEBEB; }
+  100% { background-color: #F5F5F5; }
+}
+.skeleton {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
