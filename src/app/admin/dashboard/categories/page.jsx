@@ -68,10 +68,10 @@ export default function CategoriesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold" style={{ color: '#1A1A1A' }}>Categories</h1>
+        <h1 className="text-xl md:text-2xl font-bold" style={{ color: '#1A1A1A' }}>Categories</h1>
         <button
           onClick={() => { resetForm(); setShowForm(true); }}
-          className="px-4 py-2 rounded-lg text-white text-sm font-medium"
+          className="px-3 md:px-4 py-2 rounded-lg text-white text-sm font-medium"
           style={{ backgroundColor: '#E4002B' }}
         >
           Add Category
@@ -121,7 +121,8 @@ export default function CategoriesPage() {
         </form>
       )}
 
-      <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
+      {/* Desktop table */}
+      <div className="hidden md:block bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b" style={{ borderColor: '#E5E5E5', backgroundColor: '#F9FAFB' }}>
@@ -161,6 +162,40 @@ export default function CategoriesPage() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile cards */}
+      <div className="md:hidden space-y-3">
+        {categories.map((cat) => (
+          <div key={cat.id} className="bg-white rounded-lg border p-4" style={{ borderColor: '#E5E5E5' }}>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-medium text-sm" style={{ color: '#1A1A1A' }}>{cat.name}</h3>
+              <button
+                onClick={() => handleToggleActive(cat)}
+                className="text-xs px-2 py-1 rounded-full font-medium"
+                style={{
+                  backgroundColor: cat.isActive ? '#DEF7EC' : '#FDE8E8',
+                  color: cat.isActive ? '#03543F' : '#9B1C1C',
+                }}
+              >
+                {cat.isActive ? 'Active' : 'Inactive'}
+              </button>
+            </div>
+            <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
+              <span>Slug: {cat.slug}</span>
+              <span>Order: {cat.sortOrder}</span>
+            </div>
+            <div className="flex gap-3 border-t pt-3" style={{ borderColor: '#E5E5E5' }}>
+              <button onClick={() => handleEdit(cat)} className="text-blue-600 text-xs font-medium">Edit</button>
+              <button onClick={() => handleDelete(cat.id)} className="text-red-600 text-xs font-medium">Delete</button>
+            </div>
+          </div>
+        ))}
+        {categories.length === 0 && (
+          <div className="bg-white rounded-lg border p-8 text-center text-gray-400 text-sm" style={{ borderColor: '#E5E5E5' }}>
+            No categories yet
+          </div>
+        )}
       </div>
     </div>
   );

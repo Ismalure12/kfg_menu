@@ -28,7 +28,7 @@ export default function Header() {
         {/* Logo — grayscale by default, color sweeps in on hover */}
         <Link href="/" className="shrink-0">
           <Image
-            src="/logo.png"
+            src="/logo-transparent.png"
             alt="KFG"
             width={160}
             height={48}

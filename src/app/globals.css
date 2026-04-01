@@ -67,6 +67,16 @@ body {
   color: #FFFFFF;
 }
 
+/* Category boxed tabs hover */
+.category-tab-box:hover {
+  background-color: #FFF0F0 !important;
+  color: #E4002B !important;
+}
+.category-tab-box[style*="background-color: rgb(228, 0, 43)"]:hover {
+  background-color: #E4002B !important;
+  color: #FFFFFF !important;
+}
+
 /* Skeleton loading animation */
 @keyframes shimmer {
   0% { background-color: #F5F5F5; }

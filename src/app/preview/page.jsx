@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useRef, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 
 const SAMPLE_ITEMS = [
@@ -8,6 +9,8 @@ const SAMPLE_ITEMS = [
   { id: 3, name: 'Loaded Fries', price: '5.99', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/eugene-Xk0jQPZseMk-unsplash.jpg' },
   { id: 4, name: 'Chocolate Cake', price: '5.99', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/chocolate-cake.jpg' },
 ];
+
+const SAMPLE_CATEGORIES = ['Burgers', 'Chicken', 'Sides & Extras', 'Drinks', 'Desserts'];
 
 function formatPrice(price) {
   return `USh${parseFloat(price).toLocaleString('en-US', { minimumFractionDigits: 0 })}`;
@@ -304,6 +307,159 @@ function FooterC() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
+//  CATEGORY TAB DESIGNS
+// ═══════════════════════════════════════════════════════════════════════
+
+function TabsA() {
+  const [active, setActive] = useState(0);
+  return (
+    <nav className="bg-white hide-scrollbar overflow-x-auto" style={{ borderBottom: '2px solid #E5E5E5' }}>
+      <div className="flex h-[48px] max-w-[1200px] mx-auto px-4 md:px-6">
+        {SAMPLE_CATEGORIES.map((cat, i) => (
+          <button
+            key={cat}
+            onClick={() => setActive(i)}
+            className="whitespace-nowrap shrink-0 flex items-center justify-center h-full cursor-pointer"
+            style={{
+              fontFamily: 'var(--font-oswald)',
+              fontSize: '14px',
+              fontWeight: 500,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              padding: '0 16px',
+              minWidth: '140px',
+              color: active === i ? '#E4002B' : '#666666',
+              borderBottom: active === i ? '2px solid #E4002B' : '2px solid transparent',
+              marginBottom: '-2px',
+              background: 'none',
+              transition: 'all 0.25s ease',
+            }}
+            onMouseEnter={(e) => { if (active !== i) e.currentTarget.style.color = '#E4002B'; }}
+            onMouseLeave={(e) => { if (active !== i) e.currentTarget.style.color = '#666666'; }}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
+function TabsB() {
+  const [active, setActive] = useState(0);
+  return (
+    <nav className="hide-scrollbar overflow-x-auto" style={{ backgroundColor: '#F5F5F5', padding: '8px 0' }}>
+      <div className="flex gap-2 max-w-[1200px] mx-auto px-4 md:px-6">
+        {SAMPLE_CATEGORIES.map((cat, i) => (
+          <button
+            key={cat}
+            onClick={() => setActive(i)}
+            className="whitespace-nowrap shrink-0 cursor-pointer"
+            style={{
+              fontFamily: 'var(--font-work-sans)',
+              fontSize: '13px',
+              fontWeight: active === i ? 600 : 500,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              padding: '8px 20px',
+              borderRadius: '999px',
+              backgroundColor: active === i ? '#E4002B' : 'transparent',
+              color: active === i ? '#FFFFFF' : '#666666',
+              border: 'none',
+              transition: 'all 0.25s ease',
+            }}
+            onMouseEnter={(e) => { if (active !== i) { e.currentTarget.style.backgroundColor = 'rgba(228,0,43,0.1)'; e.currentTarget.style.color = '#E4002B'; } }}
+            onMouseLeave={(e) => { if (active !== i) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#666666'; } }}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
+function TabsC() {
+  const [active, setActive] = useState(0);
+  return (
+    <nav className="bg-white hide-scrollbar overflow-x-auto" style={{ padding: '12px 0' }}>
+      <div className="flex max-w-[1200px] mx-auto px-4 md:px-6">
+        <div className="inline-flex rounded-lg overflow-hidden" style={{ border: '1.5px solid #E0E0E0' }}>
+          {SAMPLE_CATEGORIES.map((cat, i) => (
+            <button
+              key={cat}
+              onClick={() => setActive(i)}
+              className="whitespace-nowrap cursor-pointer"
+              style={{
+                fontFamily: 'var(--font-work-sans)',
+                fontSize: '13px',
+                fontWeight: active === i ? 600 : 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.3px',
+                padding: '10px 22px',
+                backgroundColor: active === i ? '#E4002B' : '#FFFFFF',
+                color: active === i ? '#FFFFFF' : '#555555',
+                border: 'none',
+                borderRight: i < SAMPLE_CATEGORIES.length - 1 ? '1px solid #E0E0E0' : 'none',
+                transition: 'all 0.25s ease',
+              }}
+              onMouseEnter={(e) => { if (active !== i) { e.currentTarget.style.backgroundColor = '#FFF0F0'; e.currentTarget.style.color = '#E4002B'; } }}
+              onMouseLeave={(e) => { if (active !== i) { e.currentTarget.style.backgroundColor = '#FFFFFF'; e.currentTarget.style.color = '#555555'; } }}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+function TabsD() {
+  const [active, setActive] = useState(0);
+  return (
+    <nav className="bg-white hide-scrollbar overflow-x-auto" style={{ borderBottom: '1px solid #F0F0F0' }}>
+      <div className="flex h-[56px] max-w-[1200px] mx-auto px-4 md:px-6">
+        {SAMPLE_CATEGORIES.map((cat, i) => (
+          <button
+            key={cat}
+            onClick={() => setActive(i)}
+            className="whitespace-nowrap shrink-0 flex flex-col items-center justify-center h-full cursor-pointer relative"
+            style={{
+              fontFamily: 'var(--font-work-sans)',
+              fontSize: '14px',
+              fontWeight: active === i ? 600 : 400,
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              padding: '0 20px',
+              minWidth: '120px',
+              color: active === i ? '#E4002B' : '#999999',
+              background: 'none',
+              border: 'none',
+              transition: 'all 0.25s ease',
+            }}
+            onMouseEnter={(e) => { if (active !== i) e.currentTarget.style.color = '#E4002B'; }}
+            onMouseLeave={(e) => { if (active !== i) e.currentTarget.style.color = '#999999'; }}
+          >
+            {cat}
+            {active === i && (
+              <span
+                className="absolute bottom-2 rounded-full"
+                style={{
+                  width: '5px',
+                  height: '5px',
+                  backgroundColor: '#E4002B',
+                }}
+              />
+            )}
+          </button>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════
 //  CARD DESIGNS
 // ═══════════════════════════════════════════════════════════════════════
 
@@ -436,6 +592,458 @@ function CardC({ item }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
+//  HORIZONTAL SCROLL CAROUSEL DESIGNS
+// ═══════════════════════════════════════════════════════════════════════
+
+const SCROLL_CATEGORIES = [
+  {
+    name: 'Burgers',
+    items: [
+      { id: 1, name: 'Classic Burger', price: '8.99', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/casey-lee-awj7sRviVXo-unsplash.jpg' },
+      { id: 2, name: 'Cheese Burger', price: '10.99', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/casey-lee-awj7sRviVXo-unsplash.jpg' },
+      { id: 3, name: 'Double Patty', price: '14.99', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/casey-lee-awj7sRviVXo-unsplash.jpg' },
+      { id: 4, name: 'BBQ Burger', price: '12.99', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/casey-lee-awj7sRviVXo-unsplash.jpg' },
+      { id: 5, name: 'Chicken Burger', price: '9.99', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/casey-lee-awj7sRviVXo-unsplash.jpg' },
+      { id: 6, name: 'Veggie Burger', price: '8.49', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/casey-lee-awj7sRviVXo-unsplash.jpg' },
+      { id: 7, name: 'Spicy Burger', price: '11.99', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/casey-lee-awj7sRviVXo-unsplash.jpg' },
+      { id: 8, name: 'Mushroom Burger', price: '12.49', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/casey-lee-awj7sRviVXo-unsplash.jpg' },
+    ],
+  },
+  {
+    name: 'Chicken',
+    items: [
+      { id: 9, name: 'Crispy Fried Chicken', price: '10.99', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/kristof-korody-O3gB6kC0wmI-unsplash.jpg' },
+      { id: 10, name: 'Grilled Chicken', price: '11.99', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/kristof-korody-O3gB6kC0wmI-unsplash.jpg' },
+      { id: 11, name: 'Chicken Wings', price: '9.49', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/kristof-korody-O3gB6kC0wmI-unsplash.jpg' },
+      { id: 12, name: 'Chicken Strips', price: '8.99', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/kristof-korody-O3gB6kC0wmI-unsplash.jpg' },
+      { id: 13, name: 'Spicy Wings', price: '10.49', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/kristof-korody-O3gB6kC0wmI-unsplash.jpg' },
+      { id: 14, name: 'Lemon Herb Chicken', price: '12.99', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/kristof-korody-O3gB6kC0wmI-unsplash.jpg' },
+    ],
+  },
+  {
+    name: 'Sides & Extras',
+    items: [
+      { id: 15, name: 'Loaded Fries', price: '5.99', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/eugene-Xk0jQPZseMk-unsplash.jpg' },
+      { id: 16, name: 'Onion Rings', price: '4.99', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/eugene-Xk0jQPZseMk-unsplash.jpg' },
+      { id: 17, name: 'Coleslaw', price: '3.49', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/eugene-Xk0jQPZseMk-unsplash.jpg' },
+      { id: 18, name: 'Mozzarella Sticks', price: '6.49', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/eugene-Xk0jQPZseMk-unsplash.jpg' },
+      { id: 19, name: 'Sweet Potato Fries', price: '5.49', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/eugene-Xk0jQPZseMk-unsplash.jpg' },
+    ],
+  },
+];
+
+// ─── Shared scroll hook ────────────────────────────────────────────
+function useHorizontalScroll(scrollAmount = 320) {
+  const ref = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkScroll = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    checkScroll();
+    el.addEventListener('scroll', checkScroll, { passive: true });
+    const ro = new ResizeObserver(checkScroll);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener('scroll', checkScroll);
+      ro.disconnect();
+    };
+  }, [checkScroll]);
+
+  const scrollLeft = () => ref.current?.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+  const scrollRight = () => ref.current?.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+
+  return { ref, canScrollLeft, canScrollRight, scrollLeft, scrollRight };
+}
+
+// ─── Arrow SVGs ────────────────────────────────────────────────────
+function ChevronLeft({ size = 20, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+  );
+}
+function ChevronRight({ size = 20, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="9 6 15 12 9 18" />
+    </svg>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  DESIGN A — Clean Snap Carousel (CSS-only scroll, minimal arrows)
+//  Inspired by: Uber Eats / DoorDash category rows
+//  Gradient fade edges, circular arrow buttons, snap-to-card
+// ═══════════════════════════════════════════════════════════════════
+
+function CarouselA({ category }) {
+  const { ref, canScrollLeft, canScrollRight, scrollLeft, scrollRight } = useHorizontalScroll(300);
+
+  return (
+    <div className="mb-10">
+      {/* Category header */}
+      <h3 style={{
+        fontFamily: 'var(--font-oswald)',
+        fontSize: '20px',
+        fontWeight: 700,
+        color: '#1A1A1A',
+        marginBottom: '14px',
+        paddingLeft: '4px',
+      }}>
+        {category.name}
+      </h3>
+
+      <div className="relative group">
+        {/* Fade edges */}
+        {canScrollLeft && (
+          <div className="absolute left-0 top-0 bottom-0 w-12 z-10 pointer-events-none"
+            style={{ background: 'linear-gradient(to right, #FAFAFA, transparent)' }} />
+        )}
+        {canScrollRight && (
+          <div className="absolute right-0 top-0 bottom-0 w-12 z-10 pointer-events-none"
+            style={{ background: 'linear-gradient(to left, #FAFAFA, transparent)' }} />
+        )}
+
+        {/* Left arrow */}
+        {canScrollLeft && (
+          <button
+            onClick={scrollLeft}
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-20 hidden md:flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            style={{
+              width: '40px', height: '40px', borderRadius: '50%',
+              backgroundColor: '#FFFFFF', border: '1px solid #E5E5E5',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.12)', color: '#1A1A1A',
+            }}
+          >
+            <ChevronLeft size={18} />
+          </button>
+        )}
+
+        {/* Right arrow */}
+        {canScrollRight && (
+          <button
+            onClick={scrollRight}
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-20 hidden md:flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            style={{
+              width: '40px', height: '40px', borderRadius: '50%',
+              backgroundColor: '#FFFFFF', border: '1px solid #E5E5E5',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.12)', color: '#1A1A1A',
+            }}
+          >
+            <ChevronRight size={18} />
+          </button>
+        )}
+
+        {/* Scroll container */}
+        <div
+          ref={ref}
+          className="flex gap-4 overflow-x-auto hide-scrollbar"
+          style={{
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+            padding: '4px 0',
+          }}
+        >
+          {category.items.map((item) => (
+            <div
+              key={item.id}
+              className="shrink-0 transition-transform duration-200 hover:-translate-y-1"
+              style={{
+                scrollSnapAlign: 'start',
+                width: '160px',
+              }}
+            >
+              <div className="overflow-hidden bg-white" style={{ borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+                <div className="relative w-full" style={{ aspectRatio: '1/1' }}>
+                  <CardImage item={item} />
+                  <div
+                    className="absolute bottom-2 right-2 rounded-full shadow-md"
+                    style={{
+                      backgroundColor: '#E4002B', color: '#FFFFFF',
+                      fontFamily: 'var(--font-work-sans)', fontSize: '11px',
+                      fontWeight: 700, padding: '3px 10px',
+                    }}
+                  >
+                    {formatPrice(item.price)}
+                  </div>
+                </div>
+                <div className="p-2.5">
+                  <h4 className="line-clamp-2" style={{
+                    fontFamily: 'var(--font-work-sans)', fontSize: '13px',
+                    fontWeight: 600, color: '#1A1A1A', lineHeight: 1.3,
+                    textTransform: 'uppercase',
+                  }}>
+                    {item.name}
+                  </h4>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  DESIGN B — Bold Card Carousel (Netflix / Spotify style)
+//  Larger cards, always-visible sleek arrows in header row,
+//  card with image overlay gradient + text on image
+// ═══════════════════════════════════════════════════════════════════
+
+function CarouselB({ category }) {
+  const { ref, canScrollLeft, canScrollRight, scrollLeft, scrollRight } = useHorizontalScroll(340);
+
+  return (
+    <div className="mb-12">
+      {/* Category header with inline arrows */}
+      <div className="flex items-center justify-between mb-4">
+        <h3 style={{
+          fontFamily: 'var(--font-oswald)',
+          fontSize: '22px',
+          fontWeight: 700,
+          color: '#1A1A1A',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px',
+        }}>
+          {category.name}
+        </h3>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={scrollLeft}
+            disabled={!canScrollLeft}
+            className="flex items-center justify-center cursor-pointer transition-all duration-200"
+            style={{
+              width: '36px', height: '36px', borderRadius: '8px',
+              backgroundColor: canScrollLeft ? '#1A1A1A' : '#E5E5E5',
+              color: canScrollLeft ? '#FFFFFF' : '#AAAAAA',
+              border: 'none',
+            }}
+          >
+            <ChevronLeft size={16} color={canScrollLeft ? '#FFFFFF' : '#AAAAAA'} />
+          </button>
+          <button
+            onClick={scrollRight}
+            disabled={!canScrollRight}
+            className="flex items-center justify-center cursor-pointer transition-all duration-200"
+            style={{
+              width: '36px', height: '36px', borderRadius: '8px',
+              backgroundColor: canScrollRight ? '#E4002B' : '#E5E5E5',
+              color: canScrollRight ? '#FFFFFF' : '#AAAAAA',
+              border: 'none',
+            }}
+          >
+            <ChevronRight size={16} color={canScrollRight ? '#FFFFFF' : '#AAAAAA'} />
+          </button>
+        </div>
+      </div>
+
+      {/* Scroll container */}
+      <div
+        ref={ref}
+        className="flex gap-4 overflow-x-auto hide-scrollbar"
+        style={{
+          scrollSnapType: 'x mandatory',
+          WebkitOverflowScrolling: 'touch',
+          padding: '4px 0',
+        }}
+      >
+        {category.items.map((item) => (
+          <div
+            key={item.id}
+            className="shrink-0 cursor-pointer transition-transform duration-300 hover:scale-[1.03]"
+            style={{
+              scrollSnapAlign: 'start',
+              width: '200px',
+            }}
+          >
+            <div className="relative overflow-hidden" style={{ borderRadius: '14px', aspectRatio: '3/4' }}>
+              <CardImage item={item} />
+              {/* Dark gradient overlay from bottom */}
+              <div
+                className="absolute inset-0"
+                style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.15) 50%, transparent 100%)' }}
+              />
+              {/* Text on image */}
+              <div className="absolute bottom-0 left-0 right-0 p-3">
+                <h4 className="line-clamp-2" style={{
+                  fontFamily: 'var(--font-work-sans)', fontSize: '14px',
+                  fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3,
+                  textTransform: 'uppercase', marginBottom: '4px',
+                }}>
+                  {item.name}
+                </h4>
+                <span style={{
+                  fontFamily: 'var(--font-work-sans)', fontSize: '13px',
+                  fontWeight: 600, color: '#FF8A8A',
+                }}>
+                  {formatPrice(item.price)}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  DESIGN C — Compact Horizontal Strip (Instagram Stories style)
+//  Circular/rounded square images, name below, pill arrow on edge,
+//  thin red progress bar showing scroll position
+// ═══════════════════════════════════════════════════════════════════
+
+function CarouselC({ category }) {
+  const { ref, canScrollLeft, canScrollRight, scrollLeft, scrollRight } = useHorizontalScroll(280);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  const handleScroll = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    setScrollProgress(max > 0 ? el.scrollLeft / max : 0);
+  }, [ref]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [handleScroll, ref]);
+
+  return (
+    <div className="mb-10">
+      {/* Category header with progress bar */}
+      <div className="flex items-center justify-between mb-3">
+        <h3 style={{
+          fontFamily: 'var(--font-oswald)',
+          fontSize: '18px',
+          fontWeight: 700,
+          color: '#1A1A1A',
+          letterSpacing: '0.3px',
+        }}>
+          {category.name}
+        </h3>
+        <span style={{
+          fontFamily: 'var(--font-work-sans)', fontSize: '12px',
+          fontWeight: 500, color: '#E4002B', textTransform: 'uppercase',
+          letterSpacing: '0.5px',
+        }}>
+          {category.items.length} items
+        </span>
+      </div>
+
+      {/* Progress bar */}
+      <div style={{ height: '2px', backgroundColor: '#EEEEEE', borderRadius: '1px', marginBottom: '14px' }}>
+        <div
+          style={{
+            height: '100%', backgroundColor: '#E4002B', borderRadius: '1px',
+            width: `${Math.max(20, scrollProgress * 100)}%`,
+            transition: 'width 0.1s ease-out',
+          }}
+        />
+      </div>
+
+      <div className="relative">
+        {/* Pill arrows on edges */}
+        {canScrollLeft && (
+          <button
+            onClick={scrollLeft}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110"
+            style={{
+              width: '32px', height: '56px', borderRadius: '0 8px 8px 0',
+              backgroundColor: 'rgba(228,0,43,0.9)', color: '#FFFFFF',
+              border: 'none', boxShadow: '2px 0 8px rgba(0,0,0,0.15)',
+            }}
+          >
+            <ChevronLeft size={16} color="#FFFFFF" />
+          </button>
+        )}
+        {canScrollRight && (
+          <button
+            onClick={scrollRight}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110"
+            style={{
+              width: '32px', height: '56px', borderRadius: '8px 0 0 8px',
+              backgroundColor: 'rgba(228,0,43,0.9)', color: '#FFFFFF',
+              border: 'none', boxShadow: '-2px 0 8px rgba(0,0,0,0.15)',
+            }}
+          >
+            <ChevronRight size={16} color="#FFFFFF" />
+          </button>
+        )}
+
+        {/* Scroll container */}
+        <div
+          ref={ref}
+          className="flex gap-3 overflow-x-auto hide-scrollbar"
+          style={{
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+            padding: '4px 0',
+          }}
+        >
+          {category.items.map((item) => (
+            <div
+              key={item.id}
+              className="shrink-0 flex flex-col items-center cursor-pointer group"
+              style={{ scrollSnapAlign: 'start', width: '130px' }}
+            >
+              {/* Rounded square image with red ring on hover */}
+              <div
+                className="relative overflow-hidden transition-all duration-300 group-hover:shadow-lg"
+                style={{
+                  width: '120px', height: '120px', borderRadius: '20px',
+                  border: '2px solid transparent',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#E4002B'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'transparent'}
+              >
+                <CardImage item={item} />
+              </div>
+              {/* Name */}
+              <h4
+                className="text-center line-clamp-2 mt-2"
+                style={{
+                  fontFamily: 'var(--font-work-sans)', fontSize: '12px',
+                  fontWeight: 600, color: '#1A1A1A', lineHeight: 1.3,
+                  textTransform: 'uppercase',
+                }}
+              >
+                {item.name}
+              </h4>
+              {/* Price pill */}
+              <span
+                className="mt-1 inline-block rounded-full"
+                style={{
+                  fontFamily: 'var(--font-work-sans)', fontSize: '11px',
+                  fontWeight: 700, color: '#E4002B',
+                  backgroundColor: '#FFF0F0', padding: '2px 10px',
+                }}
+              >
+                {formatPrice(item.price)}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════
 //  PREVIEW PAGE
 // ═══════════════════════════════════════════════════════════════════════
 
@@ -501,6 +1109,66 @@ export default function PreviewPage() {
           <VariantLabel label="Design C" description="Gradient with Social Icons" />
           <PreviewFrame>
             <FooterC />
+          </PreviewFrame>
+        </section>
+
+        {/* ── CATEGORY TABS ────────────────────────────────────────── */}
+        <section className="mb-20">
+          <SectionTitle title="Category Tab Designs" />
+
+          <VariantLabel label="Design A" description="Classic Underline" />
+          <PreviewFrame>
+            <TabsA />
+          </PreviewFrame>
+
+          <VariantLabel label="Design B" description="Pill Tabs" />
+          <PreviewFrame>
+            <TabsB />
+          </PreviewFrame>
+
+          <VariantLabel label="Design C" description="Boxed Segments" />
+          <PreviewFrame>
+            <TabsC />
+          </PreviewFrame>
+
+          <VariantLabel label="Design D" description="Minimal with Dot Indicator" />
+          <PreviewFrame>
+            <TabsD />
+          </PreviewFrame>
+        </section>
+
+        {/* ── HORIZONTAL SCROLL CAROUSELS ─────────────────────────── */}
+        <section className="mb-20">
+          <SectionTitle title="Horizontal Scroll Layouts" />
+          <p className="mb-8" style={{ fontFamily: 'var(--font-work-sans)', fontSize: '14px', color: '#666666', marginTop: '-20px' }}>
+            Each category = one horizontal row. Swipe on mobile, click arrows on desktop.
+          </p>
+
+          <VariantLabel label="Design A" description="Clean Snap Carousel — Uber Eats / DoorDash style. Fade edges, circular arrows appear on hover." />
+          <PreviewFrame>
+            <div style={{ padding: '20px 16px', backgroundColor: '#FAFAFA' }}>
+              {SCROLL_CATEGORIES.map((cat) => (
+                <CarouselA key={cat.name} category={cat} />
+              ))}
+            </div>
+          </PreviewFrame>
+
+          <VariantLabel label="Design B" description="Bold Card Carousel — Netflix style. Dark overlay on tall cards, always-visible header arrows." />
+          <PreviewFrame>
+            <div style={{ padding: '20px 16px', backgroundColor: '#FAFAFA' }}>
+              {SCROLL_CATEGORIES.map((cat) => (
+                <CarouselB key={cat.name} category={cat} />
+              ))}
+            </div>
+          </PreviewFrame>
+
+          <VariantLabel label="Design C" description="Compact Strip — Instagram Stories style. Rounded squares, scroll progress bar, red pill arrows." />
+          <PreviewFrame>
+            <div style={{ padding: '20px 16px', backgroundColor: '#FAFAFA' }}>
+              {SCROLL_CATEGORIES.map((cat) => (
+                <CarouselC key={cat.name} category={cat} />
+              ))}
+            </div>
           </PreviewFrame>
         </section>
 

@@ -23,15 +23,15 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6" style={{ color: '#1A1A1A' }}>Dashboard</h1>
-      <div className="grid grid-cols-2 gap-4 max-w-lg">
-        <div className="bg-white rounded-lg p-6 border" style={{ borderColor: '#E5E5E5' }}>
-          <p className="text-sm font-medium" style={{ color: '#666' }}>Categories</p>
-          <p className="text-3xl font-bold mt-1" style={{ color: '#1A1A1A' }}>{stats.categories}</p>
+      <h1 className="text-xl md:text-2xl font-bold mb-6" style={{ color: '#1A1A1A' }}>Dashboard</h1>
+      <div className="grid grid-cols-2 gap-3 md:gap-4 max-w-lg">
+        <div className="bg-white rounded-lg p-4 md:p-6 border" style={{ borderColor: '#E5E5E5' }}>
+          <p className="text-xs md:text-sm font-medium" style={{ color: '#666' }}>Categories</p>
+          <p className="text-2xl md:text-3xl font-bold mt-1" style={{ color: '#1A1A1A' }}>{stats.categories}</p>
         </div>
-        <div className="bg-white rounded-lg p-6 border" style={{ borderColor: '#E5E5E5' }}>
-          <p className="text-sm font-medium" style={{ color: '#666' }}>Menu Items</p>
-          <p className="text-3xl font-bold mt-1" style={{ color: '#1A1A1A' }}>{stats.items}</p>
+        <div className="bg-white rounded-lg p-4 md:p-6 border" style={{ borderColor: '#E5E5E5' }}>
+          <p className="text-xs md:text-sm font-medium" style={{ color: '#666' }}>Menu Items</p>
+          <p className="text-2xl md:text-3xl font-bold mt-1" style={{ color: '#1A1A1A' }}>{stats.items}</p>
         </div>
       </div>
     </div>

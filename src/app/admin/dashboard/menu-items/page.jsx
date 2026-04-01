@@ -120,10 +120,10 @@ export default function MenuItemsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold" style={{ color: '#1A1A1A' }}>Menu Items</h1>
+        <h1 className="text-xl md:text-2xl font-bold" style={{ color: '#1A1A1A' }}>Menu Items</h1>
         <button
           onClick={() => { resetForm(); setShowForm(true); }}
-          className="px-4 py-2 rounded-lg text-white text-sm font-medium"
+          className="px-3 md:px-4 py-2 rounded-lg text-white text-sm font-medium"
           style={{ backgroundColor: '#E4002B' }}
         >
           Add Item
@@ -135,7 +135,7 @@ export default function MenuItemsPage() {
         <select
           value={filterCategoryId}
           onChange={(e) => setFilterCategoryId(e.target.value)}
-          className="border rounded-lg px-3 py-2 text-sm"
+          className="border rounded-lg px-3 py-2 text-sm w-full md:w-auto"
           style={{ borderColor: '#E5E5E5' }}
         >
           <option value="">All Categories</option>
@@ -147,7 +147,7 @@ export default function MenuItemsPage() {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="bg-white rounded-lg border p-4 mb-6 space-y-3" style={{ borderColor: '#E5E5E5' }}>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium mb-1">Name</label>
               <input
@@ -185,7 +185,7 @@ export default function MenuItemsPage() {
               style={{ borderColor: '#E5E5E5' }}
             />
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             <div>
               <label className="block text-sm font-medium mb-1">Price</label>
               <input
@@ -209,7 +209,7 @@ export default function MenuItemsPage() {
                 style={{ borderColor: '#E5E5E5' }}
               />
             </div>
-            <div className="flex items-end pb-1">
+            <div className="flex items-end pb-1 col-span-2 md:col-span-1">
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -227,7 +227,7 @@ export default function MenuItemsPage() {
               type="file"
               accept="image/jpeg,image/png,image/webp"
               onChange={handleImageUpload}
-              className="text-sm"
+              className="text-sm w-full"
             />
             {uploading && <p className="text-xs text-gray-500 mt-1">Uploading...</p>}
             {imagePreview && (
@@ -247,7 +247,8 @@ export default function MenuItemsPage() {
         </form>
       )}
 
-      <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
+      {/* Desktop table */}
+      <div className="hidden md:block bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b" style={{ borderColor: '#E5E5E5', backgroundColor: '#F9FAFB' }}>
@@ -296,6 +297,56 @@ export default function MenuItemsPage() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile cards */}
+      <div className="md:hidden space-y-3">
+        {items.map((item) => (
+          <div key={item.id} className="bg-white rounded-lg border p-3" style={{ borderColor: '#E5E5E5' }}>
+            <div className="flex gap-3">
+              {/* Thumbnail */}
+              {item.imageUrl && (
+                <Image
+                  src={item.imageUrl}
+                  alt={item.name}
+                  width={64}
+                  height={64}
+                  className="rounded-lg object-cover shrink-0"
+                  style={{ width: '64px', height: '64px' }}
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="font-medium text-sm truncate" style={{ color: '#1A1A1A' }}>{item.name}</h3>
+                  <button
+                    onClick={() => handleToggleActive(item)}
+                    className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0"
+                    style={{
+                      backgroundColor: item.isActive ? '#DEF7EC' : '#FDE8E8',
+                      color: item.isActive ? '#03543F' : '#9B1C1C',
+                    }}
+                  >
+                    {item.isActive ? 'Active' : 'Inactive'}
+                  </button>
+                </div>
+                <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                  <span>{item.category?.name}</span>
+                  <span className="font-medium" style={{ color: '#E4002B' }}>${parseFloat(item.price).toFixed(2)}</span>
+                  <span>Order: {item.sortOrder}</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3 border-t pt-2 mt-2" style={{ borderColor: '#E5E5E5' }}>
+              <button onClick={() => handleEdit(item)} className="text-blue-600 text-xs font-medium">Edit</button>
+              <button onClick={() => handleDelete(item.id)} className="text-red-600 text-xs font-medium">Delete</button>
+            </div>
+          </div>
+        ))}
+        {items.length === 0 && (
+          <div className="bg-white rounded-lg border p-8 text-center text-gray-400 text-sm" style={{ borderColor: '#E5E5E5' }}>
+            No menu items yet
+          </div>
+        )}
       </div>
     </div>
   );
