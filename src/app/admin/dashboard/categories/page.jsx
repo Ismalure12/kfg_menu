@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ name: '', sortOrder: 0, isActive: true });
@@ -12,6 +13,7 @@ export default function CategoriesPage() {
     const res = await fetch('/api/categories');
     const data = await res.json();
     setCategories(Array.isArray(data) ? data : []);
+    setLoading(false);
   }, []);
 
   useEffect(() => { loadCategories(); }, [loadCategories]);
@@ -121,8 +123,48 @@ export default function CategoriesPage() {
         </form>
       )}
 
+      {/* Loading skeleton */}
+      {loading && (
+        <>
+          <div className="hidden md:block bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center px-4 py-3 gap-4 border-b last:border-0" style={{ borderColor: '#E5E5E5' }}>
+                <div className="skeleton rounded" style={{ height: '16px', width: '120px' }} />
+                <div className="skeleton rounded" style={{ height: '16px', width: '100px' }} />
+                <div className="skeleton rounded" style={{ height: '16px', width: '30px' }} />
+                <div className="skeleton rounded-full" style={{ height: '24px', width: '60px' }} />
+                <div className="flex gap-2 ml-auto">
+                  <div className="skeleton rounded" style={{ height: '16px', width: '30px' }} />
+                  <div className="skeleton rounded" style={{ height: '16px', width: '40px' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="md:hidden space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-lg border p-4" style={{ borderColor: '#E5E5E5' }}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="skeleton rounded" style={{ height: '16px', width: '100px' }} />
+                  <div className="skeleton rounded-full" style={{ height: '24px', width: '60px' }} />
+                </div>
+                <div className="flex gap-4 mb-3">
+                  <div className="skeleton rounded" style={{ height: '12px', width: '80px' }} />
+                  <div className="skeleton rounded" style={{ height: '12px', width: '60px' }} />
+                </div>
+                <div className="border-t pt-3" style={{ borderColor: '#E5E5E5' }}>
+                  <div className="flex gap-3">
+                    <div className="skeleton rounded" style={{ height: '14px', width: '30px' }} />
+                    <div className="skeleton rounded" style={{ height: '14px', width: '40px' }} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
       {/* Desktop table */}
-      <div className="hidden md:block bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
+      {!loading && <div className="hidden md:block bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b" style={{ borderColor: '#E5E5E5', backgroundColor: '#F9FAFB' }}>
@@ -162,10 +204,10 @@ export default function CategoriesPage() {
             )}
           </tbody>
         </table>
-      </div>
+      </div>}
 
       {/* Mobile cards */}
-      <div className="md:hidden space-y-3">
+      {!loading && <div className="md:hidden space-y-3">
         {categories.map((cat) => (
           <div key={cat.id} className="bg-white rounded-lg border p-4" style={{ borderColor: '#E5E5E5' }}>
             <div className="flex items-center justify-between mb-2">
@@ -196,7 +238,7 @@ export default function CategoriesPage() {
             No categories yet
           </div>
         )}
-      </div>
+      </div>}
     </div>
   );
 }

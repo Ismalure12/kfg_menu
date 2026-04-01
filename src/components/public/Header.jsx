@@ -37,36 +37,6 @@ export default function Header() {
           />
         </Link>
 
-        {/* Center brand */}
-        <div className="hidden sm:flex flex-col items-center">
-          <span
-            style={{
-              fontFamily: 'var(--font-oswald), sans-serif',
-              fontSize: '20px',
-              fontWeight: 700,
-              color: '#E4002B',
-              textTransform: 'uppercase',
-              letterSpacing: '4px',
-              lineHeight: 1.2,
-            }}
-          >
-            KFG
-          </span>
-          <span
-            style={{
-              fontFamily: 'var(--font-work-sans), sans-serif',
-              fontSize: '10px',
-              fontWeight: 500,
-              color: '#AAAAAA',
-              letterSpacing: '2.5px',
-              textTransform: 'uppercase',
-              marginTop: '3px',
-            }}
-          >
-            Taste the Difference
-          </span>
-        </div>
-
         {/* Sign in pill — fills red on hover */}
         <Link
           href="/admin/login"

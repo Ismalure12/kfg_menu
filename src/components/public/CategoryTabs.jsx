@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 
 export default function CategoryTabs({ categories }) {
   const [activeSlug, setActiveSlug] = useState(categories[0]?.slug || '');
-  const tabsRef = useRef(null);
+  const scrollContainerRef = useRef(null);
   const activeTabRef = useRef(null);
 
   useEffect(() => {
@@ -33,10 +33,11 @@ export default function CategoryTabs({ categories }) {
     return () => observer.disconnect();
   }, [categories]);
 
+  // Auto-scroll the tab bar to keep the active tab visible
   useEffect(() => {
-    if (activeTabRef.current && tabsRef.current) {
+    if (activeTabRef.current && scrollContainerRef.current) {
       const tab = activeTabRef.current;
-      const container = tabsRef.current;
+      const container = scrollContainerRef.current;
       const scrollLeft = tab.offsetLeft - container.offsetWidth / 2 + tab.offsetWidth / 2;
       container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
     }
@@ -52,17 +53,19 @@ export default function CategoryTabs({ categories }) {
 
   return (
     <nav
-      className="sticky z-40 bg-white hide-scrollbar overflow-x-auto"
+      className="sticky z-40 bg-white"
       style={{
         top: '72px',
         padding: '12px 0',
         borderBottom: '1px solid #E5E5E5',
-        WebkitOverflowScrolling: 'touch',
       }}
-      ref={tabsRef}
     >
-      <div className="flex max-w-[1200px] mx-auto px-4 md:px-6">
-        <div className="inline-flex rounded-lg overflow-hidden" style={{ border: '1.5px solid #E0E0E0' }}>
+      <div
+        ref={scrollContainerRef}
+        className="flex max-w-[1200px] mx-auto px-4 md:px-6 overflow-x-auto hide-scrollbar"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
+        <div className="inline-flex rounded-lg overflow-hidden shrink-0" style={{ border: '1.5px solid #E0E0E0' }}>
           {categories.map((cat, i) => {
             const isActive = activeSlug === cat.slug;
             return (
@@ -77,7 +80,7 @@ export default function CategoryTabs({ categories }) {
                   fontWeight: isActive ? 600 : 500,
                   textTransform: 'uppercase',
                   letterSpacing: '0.3px',
-                  padding: '10px 22px',
+                  padding: '10px 18px',
                   backgroundColor: isActive ? '#E4002B' : '#FFFFFF',
                   color: isActive ? '#FFFFFF' : '#555555',
                   border: 'none',

@@ -6,6 +6,7 @@ import Image from 'next/image';
 export default function MenuItemsPage() {
   const [items, setItems] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filterCategoryId, setFilterCategoryId] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -24,6 +25,7 @@ export default function MenuItemsPage() {
     const itms = await itemRes.json();
     setCategories(Array.isArray(cats) ? cats : []);
     setItems(Array.isArray(itms) ? itms : []);
+    setLoading(false);
   }, [filterCategoryId]);
 
   useEffect(() => { loadData(); }, [loadData]);
@@ -247,8 +249,57 @@ export default function MenuItemsPage() {
         </form>
       )}
 
+      {/* Loading skeleton */}
+      {loading && (
+        <>
+          <div className="hidden md:block bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-center px-4 py-3 gap-4 border-b last:border-0" style={{ borderColor: '#E5E5E5' }}>
+                <div className="flex items-center gap-2">
+                  <div className="skeleton rounded shrink-0" style={{ height: '32px', width: '32px' }} />
+                  <div className="skeleton rounded" style={{ height: '16px', width: '110px' }} />
+                </div>
+                <div className="skeleton rounded" style={{ height: '16px', width: '80px' }} />
+                <div className="skeleton rounded" style={{ height: '16px', width: '50px' }} />
+                <div className="skeleton rounded" style={{ height: '16px', width: '30px' }} />
+                <div className="skeleton rounded-full" style={{ height: '24px', width: '60px' }} />
+                <div className="flex gap-2 ml-auto">
+                  <div className="skeleton rounded" style={{ height: '16px', width: '30px' }} />
+                  <div className="skeleton rounded" style={{ height: '16px', width: '40px' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="md:hidden space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-lg border p-3" style={{ borderColor: '#E5E5E5' }}>
+                <div className="flex gap-3">
+                  <div className="skeleton rounded-lg shrink-0" style={{ width: '64px', height: '64px' }} />
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="skeleton rounded" style={{ height: '16px', width: '100px' }} />
+                      <div className="skeleton rounded-full shrink-0" style={{ height: '20px', width: '54px' }} />
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="skeleton rounded" style={{ height: '12px', width: '60px' }} />
+                      <div className="skeleton rounded" style={{ height: '12px', width: '50px' }} />
+                    </div>
+                  </div>
+                </div>
+                <div className="border-t pt-2 mt-2" style={{ borderColor: '#E5E5E5' }}>
+                  <div className="flex gap-3">
+                    <div className="skeleton rounded" style={{ height: '14px', width: '30px' }} />
+                    <div className="skeleton rounded" style={{ height: '14px', width: '40px' }} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
       {/* Desktop table */}
-      <div className="hidden md:block bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
+      {!loading && <div className="hidden md:block bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b" style={{ borderColor: '#E5E5E5', backgroundColor: '#F9FAFB' }}>
@@ -297,10 +348,10 @@ export default function MenuItemsPage() {
             )}
           </tbody>
         </table>
-      </div>
+      </div>}
 
       {/* Mobile cards */}
-      <div className="md:hidden space-y-3">
+      {!loading && <div className="md:hidden space-y-3">
         {items.map((item) => (
           <div key={item.id} className="bg-white rounded-lg border p-3" style={{ borderColor: '#E5E5E5' }}>
             <div className="flex gap-3">
@@ -347,7 +398,7 @@ export default function MenuItemsPage() {
             No menu items yet
           </div>
         )}
-      </div>
+      </div>}
     </div>
   );
 }
