@@ -13,7 +13,7 @@ const SAMPLE_ITEMS = [
 const SAMPLE_CATEGORIES = ['Burgers', 'Chicken', 'Sides & Extras', 'Drinks', 'Desserts'];
 
 function formatPrice(price) {
-  return `USh${parseFloat(price).toLocaleString('en-US', { minimumFractionDigits: 0 })}`;
+  return `$${parseFloat(price).toLocaleString('en-US', { minimumFractionDigits: 0 })}`;
 }
 
 // ─── SECTION WRAPPER ────────────────────────────────────────────────
@@ -79,13 +79,13 @@ function HeaderA() {
             Taste the Difference
           </span>
         </div>
-        <div className="shrink-0 flex items-center gap-2" style={{ fontFamily: 'var(--font-work-sans)', color: '#333333', fontWeight: 500, fontSize: '15px' }}>
+        {/* Call us — simple text + icon */}
+        <a href="tel:+256700000000" className="shrink-0 flex items-center gap-2" style={{ fontFamily: 'var(--font-work-sans)', color: '#333333', fontWeight: 500, fontSize: '15px', textDecoration: 'none' }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
           </svg>
-          Sign in
-        </div>
+          Call us
+        </a>
       </div>
     </header>
   );
@@ -132,24 +132,25 @@ function HeaderB() {
           </span>
         </div>
 
-        {/* Sign in pill — fills red on hover */}
-        <div
-          className="shrink-0 flex items-center gap-2 rounded-full pill-hover cursor-pointer"
+        {/* Call us pill — green variant */}
+        <a
+          href="tel:+256700000000"
+          className="shrink-0 flex items-center gap-2 rounded-full cursor-pointer"
           style={{
             fontFamily: 'var(--font-work-sans)',
-            color: '#333333',
-            fontWeight: 500,
+            color: '#FFFFFF',
+            fontWeight: 600,
             fontSize: '14px',
-            border: '1.5px solid #E0E0E0',
-            padding: '7px 18px',
+            backgroundColor: '#22C55E',
+            padding: '8px 20px',
+            textDecoration: 'none',
           }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
           </svg>
-          Sign in
-        </div>
+          Call us
+        </a>
       </div>
     </header>
   );
@@ -170,12 +171,13 @@ function HeaderC() {
             Taste the Difference
           </span>
         </div>
-        <div className="shrink-0 flex items-center gap-2" style={{ fontFamily: 'var(--font-work-sans)', color: '#E4002B', fontWeight: 600, fontSize: '15px' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E4002B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
+        {/* Open hours badge */}
+        <div className="shrink-0 flex items-center gap-2" style={{ fontFamily: 'var(--font-work-sans)', color: '#E4002B', fontWeight: 600, fontSize: '14px' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E4002B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
           </svg>
-          Sign in
+          <span className="hidden sm:inline">Open Daily</span> 10AM–10PM
         </div>
       </div>
     </header>
@@ -1580,17 +1582,17 @@ export default function PreviewPage() {
         <section className="mb-20">
           <SectionTitle title="Header Designs" />
 
-          <VariantLabel label="Design A" description="Clean Minimal" />
+          <VariantLabel label="Design A" description="Call us — grey border pill" />
           <PreviewFrame>
             <HeaderA />
           </PreviewFrame>
 
-          <VariantLabel label="Design B" description="Glassmorphism with Gradient Accent" />
+          <VariantLabel label="Design B" description="Call us — green filled pill" />
           <PreviewFrame className="relative" style={{ background: 'linear-gradient(135deg, #f0f0f0, #e8e8e8)' }}>
             <HeaderB />
           </PreviewFrame>
 
-          <VariantLabel label="Design C" description="Bold with Red Accent Bar" />
+          <VariantLabel label="Design C" description="Open hours — red accent bar" />
           <PreviewFrame>
             <HeaderC />
           </PreviewFrame>

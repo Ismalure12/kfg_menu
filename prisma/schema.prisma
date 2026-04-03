@@ -7,10 +7,13 @@ datasource db {
 }
 
 model AdminUser {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  createdAt    DateTime @default(now()) @map("created_at")
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  role         String    @default("user")
+  resetCode    String?   @map("reset_code")
+  resetCodeExp DateTime? @map("reset_code_exp")
+  createdAt    DateTime  @default(now()) @map("created_at")
 
   @@map("admin_users")
 }
@@ -41,4 +44,14 @@ model MenuItem {
   category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@map("menu_items")
+}
+
+model SocialLink {
+  id        Int      @id @default(autoincrement())
+  platform  String   @unique
+  value     String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("social_links")
 }

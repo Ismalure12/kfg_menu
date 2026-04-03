@@ -72,7 +72,7 @@ function ChevronDown({ rotated = false }) {
 }
 
 function formatPrice(price) {
-  return `USh${parseFloat(price).toLocaleString('en-US', { minimumFractionDigits: 0 })}`;
+  return `$${parseFloat(price).toLocaleString('en-US', { minimumFractionDigits: 0 })}`;
 }
 
 function MenuCard({ item }) {

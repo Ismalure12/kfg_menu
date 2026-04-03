@@ -80,47 +80,77 @@ export default function CategoriesPage() {
         </button>
       </div>
 
+      {/* Modal overlay */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg border p-4 mb-6 space-y-3" style={{ borderColor: '#E5E5E5' }}>
-          <div>
-            <label className="block text-sm font-medium mb-1">Name</label>
-            <input
-              type="text"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
-              className="w-full border rounded-lg px-3 py-2 text-sm"
-              style={{ borderColor: '#E5E5E5' }}
-            />
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) resetForm(); }}
+        >
+          <div
+            className="bg-white rounded-xl w-full max-w-md shadow-xl"
+            style={{ animation: 'modalIn 0.2s ease-out' }}
+          >
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: '#E5E5E5' }}>
+              <h2 className="text-lg font-bold" style={{ color: '#1A1A1A' }}>
+                {editingId ? 'Edit Category' : 'Add Category'}
+              </h2>
+              <button
+                onClick={resetForm}
+                className="flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                style={{ width: '32px', height: '32px' }}
+              >
+                <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal body */}
+            <form onSubmit={handleSubmit} className="px-5 py-4 space-y-3">
+              <div>
+                <label className="block text-sm font-medium mb-1">Name</label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  required
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  style={{ borderColor: '#E5E5E5' }}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Sort Order</label>
+                <input
+                  type="number"
+                  value={form.sortOrder}
+                  onChange={(e) => setForm({ ...form, sortOrder: e.target.value })}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  style={{ borderColor: '#E5E5E5' }}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={form.isActive}
+                  onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
+                  id="isActive"
+                />
+                <label htmlFor="isActive" className="text-sm">Active</label>
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button type="submit" className="px-4 py-2 rounded-lg text-white text-sm font-medium" style={{ backgroundColor: '#E4002B' }}>
+                  {editingId ? 'Update' : 'Create'}
+                </button>
+                <button type="button" onClick={resetForm} className="px-4 py-2 rounded-lg text-sm font-medium border" style={{ borderColor: '#E5E5E5' }}>
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Sort Order</label>
-            <input
-              type="number"
-              value={form.sortOrder}
-              onChange={(e) => setForm({ ...form, sortOrder: e.target.value })}
-              className="w-full border rounded-lg px-3 py-2 text-sm"
-              style={{ borderColor: '#E5E5E5' }}
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={form.isActive}
-              onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
-              id="isActive"
-            />
-            <label htmlFor="isActive" className="text-sm">Active</label>
-          </div>
-          <div className="flex gap-2">
-            <button type="submit" className="px-4 py-2 rounded-lg text-white text-sm font-medium" style={{ backgroundColor: '#E4002B' }}>
-              {editingId ? 'Update' : 'Create'}
-            </button>
-            <button type="button" onClick={resetForm} className="px-4 py-2 rounded-lg text-sm font-medium border" style={{ borderColor: '#E5E5E5' }}>
-              Cancel
-            </button>
-          </div>
-        </form>
+        </div>
       )}
 
       {/* Loading skeleton */}

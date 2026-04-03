@@ -109,7 +109,7 @@ async function main() {
           isActive: true,
         },
       });
-      console.log(`  + ${item.name} — USh${item.price.toLocaleString()}`);
+      console.log(`  + ${item.name} — $${item.price.toLocaleString()}`);
     }
 
     console.log('');

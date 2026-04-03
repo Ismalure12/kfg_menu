@@ -39,7 +39,7 @@ export default function MenuItemCard({ item }) {
             padding: '4px 12px',
           }}
         >
-          USh{parseFloat(item.price).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+          ${parseFloat(item.price).toLocaleString('en-US', { minimumFractionDigits: 2 })}
         </div>
       </div>
 
