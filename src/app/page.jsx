@@ -5,16 +5,22 @@ import CategoryTabs from '@/components/public/CategoryTabs';
 import MenuCarousel from '@/components/public/MenuCarousel';
 
 export default async function HomePage() {
-  const categories = await prisma.category.findMany({
-    where: { isActive: true },
-    orderBy: { sortOrder: 'asc' },
-    include: {
-      items: {
-        where: { isActive: true },
-        orderBy: { sortOrder: 'asc' },
+  const [categories, socialLinks] = await Promise.all([
+    prisma.category.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: 'asc' },
+      include: {
+        items: {
+          where: { isActive: true },
+          orderBy: { sortOrder: 'asc' },
+        },
       },
-    },
-  });
+    }),
+    prisma.socialLink.findMany(),
+  ]);
+
+  const socialMap = {};
+  socialLinks.forEach((link) => { socialMap[link.platform] = link.value; });
 
   // Filter out categories with no active items and serialize Decimal prices
   const visibleCategories = categories
@@ -29,7 +35,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Header />
+      <Header phone={socialMap.phone} />
       {visibleCategories.length === 0 ? (
         <div className="flex items-center justify-center" style={{ minHeight: 'calc(100vh - 72px)' }}>
           <p style={{ fontSize: '18px', color: '#666666' }}>Menu coming soon!</p>
@@ -42,7 +48,13 @@ export default async function HomePage() {
               <section
                 key={category.slug}
                 id={category.slug}
-                style={{ scrollMarginTop: '120px' }}
+                style={{
+                  scrollMarginTop: '120px',
+                  minHeight: '320px',
+                  paddingTop: '32px',
+                  paddingBottom: '48px',
+                  borderBottom: '1px solid #F0F0F0',
+                }}
               >
                 <MenuCarousel category={category} />
               </section>
@@ -50,7 +62,7 @@ export default async function HomePage() {
           </div>
         </>
       )}
-      <Footer />
+      <Footer socialLinks={socialMap} />
     </>
   );
 }

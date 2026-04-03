@@ -217,7 +217,7 @@ export default function MenuCarousel({ category }) {
   }, [handleScroll, ref]);
 
   return (
-    <div className="mb-8">
+    <div>
       {/* Category header with item count */}
       <div className="flex items-center justify-between mb-3">
         <h2 style={{

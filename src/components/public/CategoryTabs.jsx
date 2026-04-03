@@ -1,39 +1,44 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+
+const STICKY_HEIGHT = 120; // header (72) + tabs (~48)
 
 export default function CategoryTabs({ categories }) {
   const [activeSlug, setActiveSlug] = useState(categories[0]?.slug || '');
   const scrollContainerRef = useRef(null);
   const activeTabRef = useRef(null);
+  const isClickScrolling = useRef(false);
+  const clickTimeout = useRef(null);
 
-  useEffect(() => {
-    const sections = categories.map((cat) => document.getElementById(cat.slug));
-    const validSections = sections.filter(Boolean);
+  // Scroll-based active tab detection — replaces IntersectionObserver.
+  // Finds the section whose top is closest to (but not far below) the sticky bar.
+  const updateActiveOnScroll = useCallback(() => {
+    if (isClickScrolling.current) return;
 
-    if (validSections.length === 0) return;
+    let bestSlug = categories[0]?.slug || '';
+    let bestDistance = Infinity;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting);
-        if (visible.length > 0) {
-          const topmost = visible.reduce((prev, curr) =>
-            prev.boundingClientRect.top < curr.boundingClientRect.top ? prev : curr
-          );
-          setActiveSlug(topmost.target.id);
-        }
-      },
-      {
-        rootMargin: '-120px 0px 0px 0px',
-        threshold: 0.3,
+    for (const cat of categories) {
+      const el = document.getElementById(cat.slug);
+      if (!el) continue;
+      const top = el.getBoundingClientRect().top - STICKY_HEIGHT;
+      // Section whose top is at or above the sticky bar, closest to it
+      if (top <= 20 && Math.abs(top) < bestDistance) {
+        bestDistance = Math.abs(top);
+        bestSlug = cat.slug;
       }
-    );
+    }
 
-    validSections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
+    setActiveSlug(bestSlug);
   }, [categories]);
 
-  // Auto-scroll the tab bar to keep the active tab visible
+  useEffect(() => {
+    window.addEventListener('scroll', updateActiveOnScroll, { passive: true });
+    return () => window.removeEventListener('scroll', updateActiveOnScroll);
+  }, [updateActiveOnScroll]);
+
+  // Auto-scroll the tab bar to keep the active tab centered
   useEffect(() => {
     if (activeTabRef.current && scrollContainerRef.current) {
       const tab = activeTabRef.current;
@@ -44,11 +49,41 @@ export default function CategoryTabs({ categories }) {
   }, [activeSlug]);
 
   const handleClick = (slug) => {
-    setActiveSlug(slug);
     const el = document.getElementById(slug);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (!el) return;
+
+    // Suppress scroll-spy while we programmatically scroll
+    isClickScrolling.current = true;
+    setActiveSlug(slug);
+
+    if (clickTimeout.current) clearTimeout(clickTimeout.current);
+
+    const sectionRect = el.getBoundingClientRect();
+    const viewportH = window.innerHeight;
+    const availableH = viewportH - STICKY_HEIGHT;
+    const sectionH = sectionRect.height;
+
+    let targetScrollY;
+
+    if (sectionH <= availableH) {
+      // Section fits — center it vertically in the available space
+      const offset = (availableH - sectionH) / 2;
+      targetScrollY = window.scrollY + sectionRect.top - STICKY_HEIGHT - offset;
+    } else {
+      // Section too tall — scroll to its top
+      targetScrollY = window.scrollY + sectionRect.top - STICKY_HEIGHT;
     }
+
+    // Clamp to valid scroll range
+    const maxScroll = document.documentElement.scrollHeight - viewportH;
+    targetScrollY = Math.max(0, Math.min(targetScrollY, maxScroll));
+
+    window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
+
+    // Re-enable scroll-spy after the scroll animation finishes
+    clickTimeout.current = setTimeout(() => {
+      isClickScrolling.current = false;
+    }, 800);
   };
 
   return (

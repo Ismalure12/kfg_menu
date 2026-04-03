@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 
-export default function Header() {
+export default function Header({ phone }) {
   return (
     <header
       className="sticky top-0 z-50 relative bg-white/90 backdrop-blur-lg"
@@ -39,7 +39,7 @@ export default function Header() {
 
         {/* Call us pill */}
         <a
-          href="tel:+256700000000"
+          href={phone ? `tel:${phone}` : '#'}
           className="shrink-0 flex items-center gap-2 rounded-full pill-hover"
           style={{
             fontFamily: 'var(--font-work-sans), sans-serif',

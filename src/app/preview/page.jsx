@@ -1046,6 +1046,280 @@ function CarouselC({ category }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
+//  DESIGN F — SPACED SECTIONS + STICKY TAB BAR
+//  Same carousel but each category gets generous vertical padding so
+//  IntersectionObserver can clearly identify the active section.
+//  Includes a working sticky tab bar to prove the fix.
+// ═══════════════════════════════════════════════════════════════════════
+
+function SpacedCarouselWithTabs({ categories }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const containerRef = useRef(null);
+  const tabBarRef = useRef(null);
+  const activeTabRef = useRef(null);
+  const sectionRefs = useRef({});
+
+  // IntersectionObserver — works well now because sections have real height
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const sections = container.querySelectorAll('[data-spaced-section]');
+    if (sections.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting);
+        if (visible.length > 0) {
+          const topmost = visible.reduce((prev, curr) =>
+            prev.boundingClientRect.top < curr.boundingClientRect.top ? prev : curr
+          );
+          const idx = parseInt(topmost.target.dataset.spacedSection, 10);
+          if (!isNaN(idx)) setActiveIndex(idx);
+        }
+      },
+      { rootMargin: '-100px 0px -40% 0px', threshold: 0.1 }
+    );
+
+    sections.forEach((s) => observer.observe(s));
+    return () => observer.disconnect();
+  }, [categories]);
+
+  // Auto-scroll tab bar to keep active tab centered
+  useEffect(() => {
+    if (activeTabRef.current && tabBarRef.current) {
+      const tab = activeTabRef.current;
+      const bar = tabBarRef.current;
+      const scrollLeft = tab.offsetLeft - bar.offsetWidth / 2 + tab.offsetWidth / 2;
+      bar.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+    }
+  }, [activeIndex]);
+
+  const scrollToSection = (idx) => {
+    setActiveIndex(idx);
+    const el = sectionRefs.current[idx];
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  return (
+    <div ref={containerRef}>
+      {/* Sticky tab bar */}
+      <div
+        className="sticky z-30 bg-white"
+        style={{ top: '0px', padding: '10px 0', borderBottom: '1px solid #E5E5E5' }}
+      >
+        <div
+          ref={tabBarRef}
+          className="flex overflow-x-auto hide-scrollbar"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
+          <div className="inline-flex rounded-lg overflow-hidden shrink-0" style={{ border: '1.5px solid #E0E0E0' }}>
+            {categories.map((cat, i) => {
+              const isActive = i === activeIndex;
+              return (
+                <button
+                  key={cat.name}
+                  ref={isActive ? activeTabRef : null}
+                  onClick={() => scrollToSection(i)}
+                  className="whitespace-nowrap cursor-pointer shrink-0"
+                  style={{
+                    fontFamily: 'var(--font-work-sans)',
+                    fontSize: '13px',
+                    fontWeight: isActive ? 600 : 500,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.3px',
+                    padding: '10px 18px',
+                    backgroundColor: isActive ? '#E4002B' : '#FFFFFF',
+                    color: isActive ? '#FFFFFF' : '#555555',
+                    border: 'none',
+                    borderRight: i < categories.length - 1 ? '1px solid #E0E0E0' : 'none',
+                    transition: 'all 0.25s ease',
+                  }}
+                >
+                  {cat.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Category sections with generous spacing */}
+      {categories.map((cat, catIdx) => (
+        <SpacedCarouselSection
+          key={cat.name}
+          category={cat}
+          catIdx={catIdx}
+          sectionRef={(el) => { sectionRefs.current[catIdx] = el; }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function SpacedCarouselSection({ category, catIdx, sectionRef }) {
+  const { ref, canScrollLeft, canScrollRight, scrollLeft, scrollRight } = useHorizontalScroll(280);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  const handleScroll = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    setScrollProgress(max > 0 ? el.scrollLeft / max : 0);
+  }, [ref]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [handleScroll, ref]);
+
+  return (
+    <div
+      ref={sectionRef}
+      data-spaced-section={catIdx}
+      style={{
+        scrollMarginTop: '60px',
+        paddingTop: '32px',
+        paddingBottom: '48px',
+        minHeight: '320px',
+        borderBottom: '1px solid #F0F0F0',
+      }}
+    >
+      {/* Category header */}
+      <div className="flex items-center justify-between mb-3">
+        <h3 style={{
+          fontFamily: 'var(--font-oswald)',
+          fontSize: '18px', fontWeight: 700, color: '#1A1A1A', letterSpacing: '0.3px',
+        }}>
+          {category.name}
+        </h3>
+        <span style={{
+          fontFamily: 'var(--font-work-sans)', fontSize: '12px',
+          fontWeight: 500, color: '#E4002B', textTransform: 'uppercase', letterSpacing: '0.5px',
+        }}>
+          {category.items.length} items
+        </span>
+      </div>
+
+      {/* Progress bar */}
+      <div style={{ height: '2px', backgroundColor: '#EEEEEE', borderRadius: '1px', marginBottom: '14px' }}>
+        <div style={{
+          height: '100%', backgroundColor: '#E4002B', borderRadius: '1px',
+          width: `${Math.max(20, scrollProgress * 100)}%`, transition: 'width 0.1s ease-out',
+        }} />
+      </div>
+
+      <div className="relative">
+        {canScrollLeft && (
+          <button onClick={scrollLeft}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110"
+            style={{ width: '32px', height: '56px', borderRadius: '0 8px 8px 0', backgroundColor: 'rgba(228,0,43,0.9)', border: 'none', boxShadow: '2px 0 8px rgba(0,0,0,0.15)' }}>
+            <ChevronLeft size={16} color="#FFFFFF" />
+          </button>
+        )}
+        {canScrollRight && (
+          <button onClick={scrollRight}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110"
+            style={{ width: '32px', height: '56px', borderRadius: '8px 0 0 8px', backgroundColor: 'rgba(228,0,43,0.9)', border: 'none', boxShadow: '-2px 0 8px rgba(0,0,0,0.15)' }}>
+            <ChevronRight size={16} color="#FFFFFF" />
+          </button>
+        )}
+
+        <div ref={ref} className="flex gap-3 overflow-x-auto hide-scrollbar"
+          style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', padding: '4px 0' }}>
+          {category.items.map((item) => (
+            <SpacedDescCard key={item.id} item={item} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SpacedDescCard({ item }) {
+  const [open, setOpen] = useState(false);
+  const contentRef = useRef(null);
+  const [h, setH] = useState(0);
+
+  useEffect(() => {
+    if (contentRef.current) setH(contentRef.current.scrollHeight);
+  }, [open]);
+
+  const toggle = () => { if (item.description) setOpen(!open); };
+
+  return (
+    <div
+      className="shrink-0 flex flex-col items-center"
+      style={{ scrollSnapAlign: 'start', width: '130px', cursor: item.description ? 'pointer' : 'default' }}
+      onClick={toggle}
+    >
+      <div
+        className="relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+        style={{
+          width: '120px', height: '120px', borderRadius: '20px',
+          border: open ? '2px solid #E4002B' : '2px solid transparent',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
+        }}
+        onMouseEnter={(e) => { if (!open) e.currentTarget.style.borderColor = '#E4002B'; }}
+        onMouseLeave={(e) => { if (!open) e.currentTarget.style.borderColor = 'transparent'; }}
+      >
+        <CardImage item={item} />
+      </div>
+
+      <h4 className="text-center line-clamp-2 mt-2" style={{
+        fontFamily: 'var(--font-work-sans), sans-serif',
+        fontSize: '12px', fontWeight: 600, color: '#1A1A1A',
+        lineHeight: 1.3, textTransform: 'uppercase',
+      }}>
+        {item.name}
+      </h4>
+
+      <span className="mt-1 inline-block rounded-full" style={{
+        fontFamily: 'var(--font-work-sans), sans-serif',
+        fontSize: '11px', fontWeight: 700, color: '#E4002B',
+        backgroundColor: '#FFF0F0', padding: '2px 10px',
+      }}>
+        {formatPrice(item.price)}
+      </span>
+
+      {item.description && (
+        <button
+          onClick={(e) => { e.stopPropagation(); toggle(); }}
+          className="mt-1 flex items-center justify-center cursor-pointer"
+          style={{
+            width: '28px', height: '28px', borderRadius: '50%',
+            backgroundColor: open ? '#FFF0F0' : 'transparent',
+            border: 'none', transition: 'background-color 0.2s',
+          }}
+        >
+          <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#E4002B"
+            strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+            style={{ transition: 'transform 0.3s ease', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
+      )}
+
+      <div style={{
+        overflow: 'hidden',
+        transition: 'max-height 0.35s ease, opacity 0.3s ease',
+        maxHeight: open ? `${h}px` : '0px',
+        opacity: open ? 1 : 0,
+      }}>
+        <p ref={contentRef} style={{
+          fontFamily: 'var(--font-work-sans), sans-serif',
+          fontSize: '11px', color: '#666666', lineHeight: 1.4,
+          textAlign: 'center', padding: '6px 4px 2px', maxWidth: '130px',
+        }}>
+          {item.description}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════
 //  DESCRIPTION REVEAL CAROUSELS
 //  Based on Design C (production) + hidden description with chevron toggle
 // ═══════════════════════════════════════════════════════════════════════
@@ -1676,6 +1950,14 @@ export default function PreviewPage() {
               ))}
             </div>
           </PreviewFrame>
+
+          <VariantLabel label="Design F" description="Full Menu Demo — spaced sections + sticky tab bar + description reveal. Each category has enough vertical space so the tab tracks correctly. Scroll to test." />
+          <PreviewFrame>
+            <div style={{ backgroundColor: '#FAFAFA' }}>
+              <SpacedCarouselWithTabs categories={SCROLL_CATEGORIES} />
+            </div>
+          </PreviewFrame>
+
         </section>
 
         {/* ── DESCRIPTION REVEAL CAROUSELS ─────────────────────── */}
