@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
-import { menuItemSchema } from '@/lib/validations';
+import { subItemSchema } from '@/lib/validations';
 
 export async function PUT(request, { params }) {
   try {
@@ -12,22 +12,21 @@ export async function PUT(request, { params }) {
 
     const { id } = await params;
     const body = await request.json();
-    const parsed = menuItemSchema.partial().safeParse(body);
+    const parsed = subItemSchema.partial().safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 });
     }
 
-    const item = await prisma.menuItem.update({
+    const subItem = await prisma.subItem.update({
       where: { id: parseInt(id) },
       data: parsed.data,
-      include: { category: true, subItems: { orderBy: { sortOrder: 'asc' } } },
     });
 
-    return NextResponse.json(item);
+    return NextResponse.json(subItem);
   } catch (error) {
     if (error.code === 'P2025') {
-      return NextResponse.json({ error: 'Menu item not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Sub-item not found' }, { status: 404 });
     }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -42,14 +41,14 @@ export async function DELETE(request, { params }) {
 
     const { id } = await params;
 
-    await prisma.menuItem.delete({
+    await prisma.subItem.delete({
       where: { id: parseInt(id) },
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error.code === 'P2025') {
-      return NextResponse.json({ error: 'Menu item not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Sub-item not found' }, { status: 404 });
     }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

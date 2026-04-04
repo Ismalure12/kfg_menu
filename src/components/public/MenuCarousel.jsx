@@ -50,150 +50,161 @@ function ChevronRight() {
   );
 }
 
-function ChevronDown({ rotated = false }) {
-  return (
-    <svg
-      width={14}
-      height={14}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="#E4002B"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{
-        transition: 'transform 0.3s ease',
-        transform: rotated ? 'rotate(180deg)' : 'rotate(0deg)',
-      }}
-    >
-      <polyline points="6 9 12 15 18 9" />
-    </svg>
-  );
-}
-
 function formatPrice(price) {
   return `$${parseFloat(price).toLocaleString('en-US', { minimumFractionDigits: 0 })}`;
 }
 
-function MenuCard({ item }) {
-  const [open, setOpen] = useState(false);
-  const contentRef = useRef(null);
-  const [height, setHeight] = useState(0);
+function MenuCard({ item, isExpanded, onToggle, expandedWidth }) {
+  const cardRef = useRef(null);
 
   useEffect(() => {
-    if (contentRef.current) {
-      setHeight(contentRef.current.scrollHeight);
+    if (isExpanded && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      const timer = setTimeout(() => {
+        cardRef.current?.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      }, 370);
+      return () => clearTimeout(timer);
     }
-  }, [open]);
+  }, [isExpanded]);
 
-  const toggle = () => { if (item.description) setOpen(!open); };
+  const hasSubItems = item.subItems && item.subItems.length > 0;
+  const isExpandable = hasSubItems || item.description;
 
   return (
     <div
+      ref={cardRef}
       className="shrink-0 flex flex-col items-center"
-      style={{ scrollSnapAlign: 'start', width: '130px', cursor: item.description ? 'pointer' : 'default' }}
-      onClick={toggle}
+      style={{
+        scrollSnapAlign: 'start',
+        width: isExpanded ? `${expandedWidth}px` : '130px',
+        transition: 'width 0.35s cubic-bezier(0.4,0,0.2,1)',
+        overflow: 'hidden',
+        cursor: isExpandable ? 'pointer' : 'default',
+      }}
+      onClick={() => { if (isExpandable) onToggle(item.id); }}
     >
-      {/* Rounded square image with hover float */}
-      <div
-        className="relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-        style={{
-          width: '120px',
-          height: '120px',
-          borderRadius: '20px',
-          border: open ? '2px solid #E4002B' : '2px solid transparent',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
-        }}
-        onMouseEnter={(e) => { if (!open) e.currentTarget.style.borderColor = '#E4002B'; }}
-        onMouseLeave={(e) => { if (!open) e.currentTarget.style.borderColor = 'transparent'; }}
-      >
-        {item.imageUrl ? (
-          <Image
-            src={item.imageUrl}
-            alt={item.name}
-            fill
-            sizes="120px"
-            className="object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#F5F5F5' }}>
-            <span style={{ color: '#999999', fontSize: '12px' }}>No image</span>
+      {/* Collapsed view */}
+      {!isExpanded && (
+        <div className="flex flex-col items-center" style={{ width: '130px' }}>
+          <div
+            className="relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+            style={{
+              width: '120px',
+              height: '120px',
+              borderRadius: '20px',
+              border: '2px solid transparent',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#E4002B'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'transparent'; }}
+          >
+            {item.imageUrl ? (
+              <Image src={item.imageUrl} alt={item.name} fill sizes="120px" className="object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#F5F5F5' }}>
+                <span style={{ color: '#999999', fontSize: '12px' }}>No image</span>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Name */}
-      <h3
-        className="text-center line-clamp-2 mt-2"
-        style={{
-          fontFamily: 'var(--font-work-sans), sans-serif',
-          fontSize: '12px',
-          fontWeight: 600,
-          color: '#1A1A1A',
-          lineHeight: 1.3,
-          textTransform: 'uppercase',
-        }}
-      >
-        {item.name}
-      </h3>
+          <h3
+            className="text-center line-clamp-2 mt-2"
+            style={{
+              fontFamily: 'var(--font-work-sans), sans-serif',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: '#1A1A1A',
+              lineHeight: 1.3,
+              textTransform: 'uppercase',
+            }}
+          >
+            {item.name}
+          </h3>
 
-      {/* Price pill */}
-      <span
-        className="mt-1 inline-block rounded-full"
-        style={{
-          fontFamily: 'var(--font-work-sans), sans-serif',
-          fontSize: '11px',
-          fontWeight: 700,
-          color: '#E4002B',
-          backgroundColor: '#FFF0F0',
-          padding: '2px 10px',
-        }}
-      >
-        {formatPrice(item.price)}
-      </span>
-
-      {/* Chevron toggle — only if description exists */}
-      {item.description && (
-        <button
-          onClick={(e) => { e.stopPropagation(); toggle(); }}
-          className="mt-1 flex items-center justify-center cursor-pointer"
-          style={{
-            width: '28px',
-            height: '28px',
-            borderRadius: '50%',
-            backgroundColor: open ? '#FFF0F0' : 'transparent',
-            border: 'none',
-            transition: 'background-color 0.2s',
-          }}
-        >
-          <ChevronDown rotated={open} />
-        </button>
+          <span
+            className="mt-1 inline-block rounded-full"
+            style={{
+              fontFamily: 'var(--font-work-sans), sans-serif',
+              fontSize: '11px',
+              fontWeight: 700,
+              color: '#E4002B',
+              backgroundColor: '#FFF0F0',
+              padding: '2px 10px',
+            }}
+          >
+            {formatPrice(item.price)}
+          </span>
+        </div>
       )}
 
-      {/* Slide-down description */}
-      <div
-        style={{
-          overflow: 'hidden',
-          transition: 'max-height 0.35s ease, opacity 0.3s ease',
-          maxHeight: open ? `${height}px` : '0px',
-          opacity: open ? 1 : 0,
-        }}
-      >
-        <p
-          ref={contentRef}
+      {/* Expanded view — Design G */}
+      {isExpanded && (
+        <div
+          className="flex gap-3 relative"
           style={{
-            fontFamily: 'var(--font-work-sans), sans-serif',
-            fontSize: '11px',
-            color: '#666666',
-            lineHeight: 1.4,
-            textAlign: 'center',
-            padding: '6px 4px 2px',
-            maxWidth: '130px',
+            width: '100%',
+            backgroundColor: '#FFFFFF',
+            borderRadius: '16px',
+            padding: '14px',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+            border: '1px solid #F0F0F0',
           }}
+          onClick={(e) => e.stopPropagation()}
         >
-          {item.description}
-        </p>
-      </div>
+          {/* Close button */}
+          <button
+            onClick={() => onToggle(item.id)}
+            className="absolute cursor-pointer flex items-center justify-center"
+            style={{ top: '8px', right: '8px', width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#F0F0F0', border: 'none', zIndex: 2 }}
+          >
+            <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+          </button>
+
+          {/* Left: Image */}
+          <div className="relative shrink-0 overflow-hidden" style={{ width: '110px', height: '110px', borderRadius: '16px' }}>
+            {item.imageUrl ? (
+              <Image src={item.imageUrl} alt={item.name} fill sizes="110px" className="object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#F5F5F5' }}>
+                <span style={{ color: '#999', fontSize: '12px' }}>No image</span>
+              </div>
+            )}
+          </div>
+
+          {/* Right: Name + Description + Sub-items */}
+          <div className="flex flex-col flex-1 min-w-0" style={{ paddingRight: '20px' }}>
+            <h3 style={{ fontFamily: 'var(--font-oswald), sans-serif', fontSize: '16px', fontWeight: 700, color: '#1A1A1A', marginBottom: '4px' }}>
+              {item.name}
+            </h3>
+
+            {item.description && (
+              <p style={{ fontFamily: 'var(--font-work-sans), sans-serif', fontSize: '12px', color: '#666', lineHeight: 1.5, marginBottom: hasSubItems ? '6px' : '8px' }}>
+                {item.description}
+              </p>
+            )}
+
+            {hasSubItems ? (
+              <div className="flex flex-col">
+                {item.subItems.map((sub, i) => (
+                  <div
+                    key={sub.id || i}
+                    className="flex items-center justify-between"
+                    style={{ padding: '7px 0', borderBottom: i < item.subItems.length - 1 ? '1px solid #F0F0F0' : 'none' }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#22C55E', flexShrink: 0 }} />
+                      <span style={{ fontFamily: 'var(--font-work-sans), sans-serif', fontSize: '13px', color: '#333' }}>{sub.name}</span>
+                    </div>
+                    <span style={{ fontFamily: 'var(--font-work-sans), sans-serif', fontSize: '13px', fontWeight: 700, color: '#1A1A1A' }}>{formatPrice(sub.price)}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <span style={{ fontFamily: 'var(--font-work-sans), sans-serif', fontSize: '14px', fontWeight: 700, color: '#E4002B' }}>{formatPrice(item.price)}</span>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -201,6 +212,8 @@ function MenuCard({ item }) {
 export default function MenuCarousel({ category }) {
   const { ref, canScrollLeft, canScrollRight, scrollLeft, scrollRight } = useHorizontalScroll(280);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [expandedId, setExpandedId] = useState(null);
+  const [containerWidth, setContainerWidth] = useState(320);
 
   const handleScroll = useCallback(() => {
     const el = ref.current;
@@ -213,8 +226,15 @@ export default function MenuCarousel({ category }) {
     const el = ref.current;
     if (!el) return;
     el.addEventListener('scroll', handleScroll, { passive: true });
-    return () => el.removeEventListener('scroll', handleScroll);
+    setContainerWidth(el.clientWidth);
+    const ro = new ResizeObserver(() => {
+      if (ref.current) setContainerWidth(ref.current.clientWidth);
+    });
+    ro.observe(el);
+    return () => { el.removeEventListener('scroll', handleScroll); ro.disconnect(); };
   }, [handleScroll, ref]);
+
+  const handleToggle = (id) => setExpandedId(expandedId === id ? null : id);
 
   return (
     <div>
@@ -302,7 +322,13 @@ export default function MenuCarousel({ category }) {
           }}
         >
           {category.items.map((item) => (
-            <MenuCard key={item.id} item={item} />
+            <MenuCard
+              key={item.id}
+              item={item}
+              isExpanded={expandedId === item.id}
+              onToggle={handleToggle}
+              expandedWidth={containerWidth - 8}
+            />
           ))}
         </div>
       </div>

@@ -15,6 +15,10 @@ export default function MenuItemsPage() {
   const [form, setForm] = useState({
     name: '', description: '', price: '', categoryId: '', imageUrl: '', sortOrder: 0, isActive: true,
   });
+  const [subItems, setSubItems] = useState([]);
+  const [subForm, setSubForm] = useState({ name: '', price: '', sortOrder: 0 });
+  const [editingSubId, setEditingSubId] = useState(null);
+  const [showSubForm, setShowSubForm] = useState(false);
 
   const loadData = useCallback(async () => {
     const [catRes, itemRes] = await Promise.all([
@@ -30,11 +34,25 @@ export default function MenuItemsPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  const loadSubItems = async (menuItemId) => {
+    const res = await fetch(`/api/sub-items?menuItemId=${menuItemId}`);
+    const data = await res.json();
+    setSubItems(Array.isArray(data) ? data : []);
+  };
+
+  const resetSubForm = () => {
+    setSubForm({ name: '', price: '', sortOrder: 0 });
+    setEditingSubId(null);
+    setShowSubForm(false);
+  };
+
   const resetForm = () => {
     setForm({ name: '', description: '', price: '', categoryId: '', imageUrl: '', sortOrder: 0, isActive: true });
     setEditingId(null);
     setShowForm(false);
     setImagePreview(null);
+    setSubItems([]);
+    resetSubForm();
   };
 
   const handleImageUpload = async (e) => {
@@ -102,6 +120,7 @@ export default function MenuItemsPage() {
     setEditingId(item.id);
     setImagePreview(item.imageUrl);
     setShowForm(true);
+    loadSubItems(item.id);
   };
 
   const handleDelete = async (id) => {
@@ -116,6 +135,47 @@ export default function MenuItemsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ isActive: !item.isActive }),
     });
+    loadData();
+  };
+
+  const handleSubSubmit = async (e) => {
+    e.preventDefault();
+    const payload = {
+      menuItemId: editingId,
+      name: subForm.name,
+      price: parseFloat(subForm.price),
+      sortOrder: Number(subForm.sortOrder),
+    };
+
+    if (editingSubId) {
+      await fetch(`/api/sub-items/${editingSubId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      await fetch('/api/sub-items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    }
+
+    resetSubForm();
+    loadSubItems(editingId);
+    loadData();
+  };
+
+  const handleSubEdit = (sub) => {
+    setSubForm({ name: sub.name, price: sub.price, sortOrder: sub.sortOrder });
+    setEditingSubId(sub.id);
+    setShowSubForm(true);
+  };
+
+  const handleSubDelete = async (id) => {
+    if (!confirm('Delete this sub-item?')) return;
+    await fetch(`/api/sub-items/${id}`, { method: 'DELETE' });
+    loadSubItems(editingId);
     loadData();
   };
 
@@ -277,6 +337,87 @@ export default function MenuItemsPage() {
                 </button>
               </div>
             </form>
+
+            {/* Sub-items section — only when editing */}
+            {editingId && (
+              <div className="px-5 py-4 border-t" style={{ borderColor: '#E5E5E5' }}>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-bold" style={{ color: '#1A1A1A' }}>
+                    Sub-Items / Variants
+                    <span className="ml-2 text-xs font-normal text-gray-400">({subItems.length})</span>
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => { resetSubForm(); setShowSubForm(true); }}
+                    className="text-xs px-3 py-1 rounded-lg text-white font-medium"
+                    style={{ backgroundColor: '#E4002B' }}
+                  >
+                    + Add
+                  </button>
+                </div>
+
+                {/* Sub-item inline form */}
+                {showSubForm && (
+                  <form onSubmit={handleSubSubmit} className="flex flex-wrap gap-2 mb-3 p-3 rounded-lg" style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E5E5' }}>
+                    <input
+                      type="text"
+                      placeholder="Name (e.g. Large)"
+                      value={subForm.name}
+                      onChange={(e) => setSubForm({ ...subForm, name: e.target.value })}
+                      required
+                      className="flex-1 min-w-[120px] border rounded-lg px-3 py-1.5 text-sm"
+                      style={{ borderColor: '#E5E5E5' }}
+                    />
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="Price"
+                      value={subForm.price}
+                      onChange={(e) => setSubForm({ ...subForm, price: e.target.value })}
+                      required
+                      className="w-24 border rounded-lg px-3 py-1.5 text-sm"
+                      style={{ borderColor: '#E5E5E5' }}
+                    />
+                    <input
+                      type="number"
+                      placeholder="Order"
+                      value={subForm.sortOrder}
+                      onChange={(e) => setSubForm({ ...subForm, sortOrder: e.target.value })}
+                      className="w-16 border rounded-lg px-2 py-1.5 text-sm"
+                      style={{ borderColor: '#E5E5E5' }}
+                    />
+                    <button type="submit" className="px-3 py-1.5 rounded-lg text-white text-xs font-medium" style={{ backgroundColor: '#E4002B' }}>
+                      {editingSubId ? 'Update' : 'Add'}
+                    </button>
+                    <button type="button" onClick={resetSubForm} className="px-3 py-1.5 rounded-lg text-xs font-medium border" style={{ borderColor: '#E5E5E5' }}>
+                      Cancel
+                    </button>
+                  </form>
+                )}
+
+                {/* Sub-items list */}
+                {subItems.length > 0 ? (
+                  <div className="space-y-1">
+                    {subItems.map((sub) => (
+                      <div key={sub.id} className="flex items-center justify-between px-3 py-2 rounded-lg text-sm" style={{ backgroundColor: '#F9FAFB' }}>
+                        <div className="flex items-center gap-2">
+                          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: sub.isActive ? '#22C55E' : '#999' }} />
+                          <span className="font-medium">{sub.name}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="font-medium" style={{ color: '#E4002B' }}>${parseFloat(sub.price).toFixed(2)}</span>
+                          <button onClick={() => handleSubEdit(sub)} className="text-blue-600 text-xs">Edit</button>
+                          <button onClick={() => handleSubDelete(sub.id)} className="text-red-600 text-xs">Delete</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-400 text-center py-2">No sub-items yet. Add variants like sizes or flavors.</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -352,6 +493,11 @@ export default function MenuItemsPage() {
                       <Image src={item.imageUrl} alt="" width={32} height={32} className="rounded object-cover" style={{ width: '32px', height: '32px' }} />
                     )}
                     {item.name}
+                    {item.subItems?.length > 0 && (
+                      <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{ backgroundColor: '#FFF0F0', color: '#E4002B' }}>
+                        {item.subItems.length} var
+                      </span>
+                    )}
                   </div>
                 </td>
                 <td className="px-4 py-3 text-gray-500">{item.category?.name}</td>
@@ -400,7 +546,14 @@ export default function MenuItemsPage() {
               )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-medium text-sm truncate" style={{ color: '#1A1A1A' }}>{item.name}</h3>
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="font-medium text-sm truncate" style={{ color: '#1A1A1A' }}>{item.name}</h3>
+                    {item.subItems?.length > 0 && (
+                      <span className="text-xs px-1.5 py-0.5 rounded-full font-medium shrink-0" style={{ backgroundColor: '#FFF0F0', color: '#E4002B' }}>
+                        {item.subItems.length}
+                      </span>
+                    )}
+                  </div>
                   <button
                     onClick={() => handleToggleActive(item)}
                     className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0"

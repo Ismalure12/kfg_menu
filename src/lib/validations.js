@@ -58,3 +58,11 @@ export const menuItemSchema = z.object({
   sortOrder: z.number().int().min(0).optional().default(0),
   isActive: z.boolean().optional().default(true),
 });
+
+export const subItemSchema = z.object({
+  menuItemId: z.number().int().positive(),
+  name: z.string().min(1).max(200),
+  price: z.number().positive(),
+  sortOrder: z.number().int().min(0).optional().default(0),
+  isActive: z.boolean().optional().default(true),
+});

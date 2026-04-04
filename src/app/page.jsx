@@ -13,6 +13,12 @@ export default async function HomePage() {
         items: {
           where: { isActive: true },
           orderBy: { sortOrder: 'asc' },
+          include: {
+            subItems: {
+              where: { isActive: true },
+              orderBy: { sortOrder: 'asc' },
+            },
+          },
         },
       },
     }),
@@ -30,6 +36,10 @@ export default async function HomePage() {
       items: cat.items.map((item) => ({
         ...item,
         price: item.price.toString(),
+        subItems: item.subItems.map((sub) => ({
+          ...sub,
+          price: sub.price.toString(),
+        })),
       })),
     }));
 

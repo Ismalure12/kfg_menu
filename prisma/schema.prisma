@@ -41,9 +41,23 @@ model MenuItem {
   sortOrder   Int      @default(0) @map("sort_order")
   isActive    Boolean  @default(true) @map("is_active")
   createdAt   DateTime @default(now()) @map("created_at")
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subItems    SubItem[]
 
   @@map("menu_items")
+}
+
+model SubItem {
+  id         Int      @id @default(autoincrement())
+  menuItemId Int      @map("menu_item_id")
+  name       String
+  price      Decimal  @db.Decimal(10, 2)
+  sortOrder  Int      @default(0) @map("sort_order")
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at")
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+  @@map("sub_items")
 }
 
 model SocialLink {

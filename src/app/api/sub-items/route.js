@@ -1,28 +1,23 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
-import { menuItemSchema } from '@/lib/validations';
+import { subItemSchema } from '@/lib/validations';
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const categoryId = searchParams.get('categoryId');
+    const menuItemId = searchParams.get('menuItemId');
 
-    const where = { isActive: true };
-    if (categoryId) {
-      where.categoryId = parseInt(categoryId);
+    if (!menuItemId) {
+      return NextResponse.json({ error: 'menuItemId is required' }, { status: 400 });
     }
 
-    const items = await prisma.menuItem.findMany({
-      where,
-      include: {
-        category: true,
-        subItems: { orderBy: { sortOrder: 'asc' } },
-      },
+    const subItems = await prisma.subItem.findMany({
+      where: { menuItemId: parseInt(menuItemId) },
       orderBy: { sortOrder: 'asc' },
     });
 
-    return NextResponse.json(items);
+    return NextResponse.json(subItems);
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -36,18 +31,17 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const parsed = menuItemSchema.safeParse(body);
+    const parsed = subItemSchema.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 });
     }
 
-    const item = await prisma.menuItem.create({
+    const subItem = await prisma.subItem.create({
       data: parsed.data,
-      include: { category: true, subItems: true },
     });
 
-    return NextResponse.json(item, { status: 201 });
+    return NextResponse.json(subItem, { status: 201 });
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

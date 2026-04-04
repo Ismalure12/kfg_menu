@@ -601,10 +601,10 @@ const SCROLL_CATEGORIES = [
   {
     name: 'Burgers',
     items: [
-      { id: 1, name: 'Classic Burger', price: '8.99', description: 'Juicy beef patty with fresh lettuce, tomato, pickles & our signature sauce on a toasted sesame bun.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/casey-lee-awj7sRviVXo-unsplash.jpg' },
+      { id: 1, name: 'Classic Burger', price: '8.99', description: 'Juicy beef patty with fresh lettuce, tomato, pickles & our signature sauce on a toasted sesame bun.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/casey-lee-awj7sRviVXo-unsplash.jpg', subItems: [{ name: 'Single', price: '8.99' }, { name: 'Double', price: '12.99' }, { name: 'Triple', price: '16.99' }] },
       { id: 2, name: 'Cheese Burger', price: '10.99', description: 'Double melted cheddar over a seasoned beef patty, caramelized onions & ketchup.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/casey-lee-awj7sRviVXo-unsplash.jpg' },
       { id: 3, name: 'Double Patty', price: '14.99', description: 'Two quarter-pound beef patties stacked with cheese, bacon, lettuce & mayo.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/casey-lee-awj7sRviVXo-unsplash.jpg' },
-      { id: 4, name: 'BBQ Burger', price: '12.99', description: 'Smoky BBQ glazed patty with crispy onion rings, jalape\u00f1os & pepper jack cheese.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/casey-lee-awj7sRviVXo-unsplash.jpg' },
+      { id: 4, name: 'BBQ Burger', price: '12.99', description: 'Smoky BBQ glazed patty with crispy onion rings, jalape\u00f1os & pepper jack cheese.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/casey-lee-awj7sRviVXo-unsplash.jpg', subItems: [{ name: 'Regular', price: '12.99' }, { name: 'Large', price: '15.99' }] },
       { id: 5, name: 'Chicken Burger', price: '9.99', description: 'Crispy breaded chicken fillet with coleslaw, pickles & garlic aioli.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/casey-lee-awj7sRviVXo-unsplash.jpg' },
       { id: 6, name: 'Veggie Burger', price: '8.49', description: 'Black bean & roasted corn patty with avocado, sprouts & chipotle mayo.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/casey-lee-awj7sRviVXo-unsplash.jpg' },
       { id: 7, name: 'Spicy Burger', price: '11.99', description: 'Fire-grilled patty with ghost pepper sauce, jalape\u00f1os & habanero mayo.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/casey-lee-awj7sRviVXo-unsplash.jpg' },
@@ -616,7 +616,7 @@ const SCROLL_CATEGORIES = [
     items: [
       { id: 9, name: 'Crispy Fried Chicken', price: '10.99', description: 'Three pieces of golden-fried chicken, double-breaded with our secret 11-spice blend.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/kristof-korody-O3gB6kC0wmI-unsplash.jpg' },
       { id: 10, name: 'Grilled Chicken', price: '11.99', description: 'Herb-marinated chicken thighs, flame-grilled and served with garlic butter.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/kristof-korody-O3gB6kC0wmI-unsplash.jpg' },
-      { id: 11, name: 'Chicken Wings', price: '9.49', description: 'Six crispy wings tossed in your choice of buffalo, BBQ or honey garlic sauce.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/kristof-korody-O3gB6kC0wmI-unsplash.jpg' },
+      { id: 11, name: 'Chicken Wings', price: '9.49', description: 'Six crispy wings tossed in your choice of buffalo, BBQ or honey garlic sauce.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/kristof-korody-O3gB6kC0wmI-unsplash.jpg', subItems: [{ name: '6 Pieces', price: '9.49' }, { name: '12 Pieces', price: '16.99' }, { name: '18 Pieces', price: '22.99' }] },
       { id: 12, name: 'Chicken Strips', price: '8.99', description: 'Five tender chicken strips with golden breading, served with ranch dipping sauce.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/kristof-korody-O3gB6kC0wmI-unsplash.jpg' },
       { id: 13, name: 'Spicy Wings', price: '10.49', description: 'Wings marinated in habanero chili paste, deep-fried and drizzled with hot honey.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/kristof-korody-O3gB6kC0wmI-unsplash.jpg' },
       { id: 14, name: 'Lemon Herb Chicken', price: '12.99', description: 'Whole chicken leg roasted with lemon zest, rosemary, thyme & roasted garlic.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/kristof-korody-O3gB6kC0wmI-unsplash.jpg' },
@@ -625,7 +625,7 @@ const SCROLL_CATEGORIES = [
   {
     name: 'Sides & Extras',
     items: [
-      { id: 15, name: 'Loaded Fries', price: '5.99', description: 'Crispy fries topped with melted cheese, bacon bits, sour cream & chives.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/eugene-Xk0jQPZseMk-unsplash.jpg' },
+      { id: 15, name: 'Loaded Fries', price: '5.99', description: 'Crispy fries topped with melted cheese, bacon bits, sour cream & chives.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/eugene-Xk0jQPZseMk-unsplash.jpg', subItems: [{ name: 'Cheesy', price: '5.99' }, { name: 'Spicy Peri Peri', price: '5.99' }, { name: 'Truffle Parmesan', price: '6.99' }, { name: 'Salted', price: '4.99' }] },
       { id: 16, name: 'Onion Rings', price: '4.99', description: 'Thick-cut onion rings in a crispy beer batter, served with chipotle dip.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/eugene-Xk0jQPZseMk-unsplash.jpg' },
       { id: 17, name: 'Coleslaw', price: '3.49', description: 'Freshly shredded cabbage & carrots in a creamy, tangy house-made dressing.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/eugene-Xk0jQPZseMk-unsplash.jpg' },
       { id: 18, name: 'Mozzarella Sticks', price: '6.49', description: 'Six golden-fried mozzarella sticks with warm marinara dipping sauce.', imageUrl: 'https://tioyhhs1jb76lw5p.public.blob.vercel-storage.com/menu/eugene-Xk0jQPZseMk-unsplash.jpg' },
@@ -1824,6 +1824,682 @@ function DescCarouselC({ category }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
+//  SUB-ITEM EXPAND DESIGNS (G, H, I)
+// ═══════════════════════════════════════════════════════════════════════
+
+// ─── Design G: Clean List Expand ─────────────────────────────────────
+
+function SubItemCardG({ item, isExpanded, onToggle, expandedWidth }) {
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    if (isExpanded && cardRef.current) {
+      // Scroll immediately to start, then again after width transition completes
+      cardRef.current.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      const timer = setTimeout(() => {
+        cardRef.current?.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      }, 370);
+      return () => clearTimeout(timer);
+    }
+  }, [isExpanded]);
+
+  return (
+    <div
+      ref={cardRef}
+      className="shrink-0 flex flex-col items-center cursor-pointer"
+      onClick={() => onToggle(item.id)}
+      style={{
+        scrollSnapAlign: 'start',
+        width: isExpanded ? `${expandedWidth}px` : '130px',
+        transition: 'width 0.35s cubic-bezier(0.4,0,0.2,1)',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Collapsed view */}
+      {!isExpanded && (
+        <div className="flex flex-col items-center" style={{ width: '130px' }}>
+          <div
+            className="relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+            style={{ width: '120px', height: '120px', borderRadius: '20px', boxShadow: '0 2px 12px rgba(0,0,0,0.1)' }}
+          >
+            {item.imageUrl ? (
+              <Image src={item.imageUrl} alt={item.name} fill sizes="120px" className="object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#F5F5F5' }}>
+                <span style={{ color: '#999', fontSize: '12px' }}>No image</span>
+              </div>
+            )}
+          </div>
+          <h3 className="text-center line-clamp-2 mt-2" style={{ fontFamily: 'var(--font-work-sans)', fontSize: '12px', fontWeight: 600, color: '#1A1A1A', lineHeight: 1.3, textTransform: 'uppercase' }}>
+            {item.name}
+          </h3>
+          <span className="mt-1 inline-block rounded-full" style={{ fontFamily: 'var(--font-work-sans)', fontSize: '11px', fontWeight: 700, color: '#E4002B', backgroundColor: '#FFF0F0', padding: '2px 10px' }}>
+            {formatPrice(item.price)}
+          </span>
+        </div>
+      )}
+
+      {/* Expanded view */}
+      {isExpanded && (
+        <div
+          className="flex gap-3 relative"
+          style={{
+            width: '100%',
+            backgroundColor: '#FFFFFF',
+            borderRadius: '16px',
+            padding: '14px',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+            border: '1px solid #F0F0F0',
+            opacity: 1,
+            animation: 'fadeIn 0.3s ease',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Close button */}
+          <button
+            onClick={() => onToggle(item.id)}
+            className="absolute cursor-pointer flex items-center justify-center"
+            style={{ top: '8px', right: '8px', width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#F0F0F0', border: 'none', zIndex: 2 }}
+          >
+            <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+          </button>
+
+          {/* Left: Image */}
+          <div className="relative shrink-0 overflow-hidden" style={{ width: '110px', height: '110px', borderRadius: '16px' }}>
+            {item.imageUrl ? (
+              <Image src={item.imageUrl} alt={item.name} fill sizes="110px" className="object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#F5F5F5' }}>
+                <span style={{ color: '#999', fontSize: '12px' }}>No image</span>
+              </div>
+            )}
+          </div>
+
+          {/* Right: Details */}
+          <div className="flex flex-col flex-1 min-w-0" style={{ paddingRight: '20px' }}>
+            <h3 style={{ fontFamily: 'var(--font-oswald)', fontSize: '16px', fontWeight: 700, color: '#1A1A1A', marginBottom: '8px' }}>
+              {item.name}
+            </h3>
+
+            {item.description && (
+              <p style={{ fontFamily: 'var(--font-work-sans)', fontSize: '12px', color: '#666', lineHeight: 1.5, marginBottom: item.subItems ? '6px' : '8px' }}>{item.description}</p>
+            )}
+
+            {item.subItems ? (
+              <div className="flex flex-col">
+                {item.subItems.map((sub, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between"
+                    style={{ padding: '7px 0', borderBottom: i < item.subItems.length - 1 ? '1px solid #F0F0F0' : 'none' }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#22C55E', flexShrink: 0 }} />
+                      <span style={{ fontFamily: 'var(--font-work-sans)', fontSize: '13px', color: '#333' }}>{sub.name}</span>
+                    </div>
+                    <span style={{ fontFamily: 'var(--font-work-sans)', fontSize: '13px', fontWeight: 700, color: '#1A1A1A' }}>{formatPrice(sub.price)}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <span style={{ fontFamily: 'var(--font-work-sans)', fontSize: '14px', fontWeight: 700, color: '#E4002B' }}>{formatPrice(item.price)}</span>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SubItemCarouselG({ category }) {
+  const { ref, canScrollLeft, canScrollRight, scrollLeft, scrollRight } = useHorizontalScroll(280);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [expandedId, setExpandedId] = useState(null);
+  const [containerWidth, setContainerWidth] = useState(320);
+
+  const handleScroll = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    setScrollProgress(max > 0 ? el.scrollLeft / max : 0);
+  }, [ref]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    setContainerWidth(el.clientWidth);
+    const ro = new ResizeObserver(() => setContainerWidth(el.clientWidth));
+    ro.observe(el);
+    return () => { el.removeEventListener('scroll', handleScroll); ro.disconnect(); };
+  }, [handleScroll, ref]);
+
+  const handleToggle = (id) => setExpandedId(expandedId === id ? null : id);
+
+  return (
+    <div className="mb-8">
+      <div className="flex items-center justify-between mb-3">
+        <h3 style={{ fontFamily: 'var(--font-oswald)', fontSize: '1.375rem', fontWeight: 700, color: '#1A1A1A' }}>{category.name}</h3>
+        <span style={{ fontFamily: 'var(--font-work-sans)', fontSize: '12px', fontWeight: 500, color: '#E4002B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{category.items.length} items</span>
+      </div>
+      <div style={{ height: '2px', backgroundColor: '#EEE', borderRadius: '1px', marginBottom: '14px' }}>
+        <div style={{ height: '100%', backgroundColor: '#E4002B', borderRadius: '1px', width: `${Math.max(20, scrollProgress * 100)}%`, transition: 'width 0.1s ease-out' }} />
+      </div>
+      <div className="relative">
+        {canScrollLeft && (
+          <button onClick={scrollLeft} className="absolute left-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110" style={{ width: '32px', height: '56px', borderRadius: '0 8px 8px 0', backgroundColor: 'rgba(228,0,43,0.9)', border: 'none', boxShadow: '2px 0 8px rgba(0,0,0,0.15)' }}>
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+          </button>
+        )}
+        {canScrollRight && (
+          <button onClick={scrollRight} className="absolute right-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110" style={{ width: '32px', height: '56px', borderRadius: '8px 0 0 8px', backgroundColor: 'rgba(228,0,43,0.9)', border: 'none', boxShadow: '-2px 0 8px rgba(0,0,0,0.15)' }}>
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 6 15 12 9 18" /></svg>
+          </button>
+        )}
+        <div ref={ref} className="flex gap-3 overflow-x-auto hide-scrollbar" style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', padding: '4px 0' }}>
+          {category.items.map((item) => (
+            <SubItemCardG key={item.id} item={item} isExpanded={expandedId === item.id} onToggle={handleToggle} expandedWidth={containerWidth - 8} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Design H: Slide Panel Expand ────────────────────────────────────
+
+function SubItemCardH({ item, isExpanded, onToggle, expandedWidth }) {
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    if (isExpanded && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      const timer = setTimeout(() => {
+        cardRef.current?.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      }, 370);
+      return () => clearTimeout(timer);
+    }
+  }, [isExpanded]);
+
+  return (
+    <div
+      ref={cardRef}
+      className="shrink-0 flex flex-col items-center cursor-pointer"
+      onClick={() => onToggle(item.id)}
+      style={{
+        scrollSnapAlign: 'start',
+        width: isExpanded ? `${expandedWidth}px` : '130px',
+        transition: 'width 0.35s cubic-bezier(0.4,0,0.2,1)',
+        overflow: 'hidden',
+      }}
+    >
+      {!isExpanded && (
+        <div className="flex flex-col items-center" style={{ width: '130px' }}>
+          <div className="relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg" style={{ width: '120px', height: '120px', borderRadius: '20px', boxShadow: '0 2px 12px rgba(0,0,0,0.1)' }}>
+            {item.imageUrl ? (
+              <Image src={item.imageUrl} alt={item.name} fill sizes="120px" className="object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#F5F5F5' }}><span style={{ color: '#999', fontSize: '12px' }}>No image</span></div>
+            )}
+          </div>
+          <h3 className="text-center line-clamp-2 mt-2" style={{ fontFamily: 'var(--font-work-sans)', fontSize: '12px', fontWeight: 600, color: '#1A1A1A', lineHeight: 1.3, textTransform: 'uppercase' }}>{item.name}</h3>
+          <span className="mt-1 inline-block rounded-full" style={{ fontFamily: 'var(--font-work-sans)', fontSize: '11px', fontWeight: 700, color: '#E4002B', backgroundColor: '#FFF0F0', padding: '2px 10px' }}>{formatPrice(item.price)}</span>
+        </div>
+      )}
+
+      {isExpanded && (
+        <div
+          className="flex gap-3 relative"
+          style={{
+            width: '100%',
+            backgroundColor: '#FFF0F0',
+            borderRadius: '16px',
+            padding: '14px',
+            border: '1.5px solid #FFDEDE',
+            animation: 'fadeIn 0.3s ease',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Close button — red */}
+          <button
+            onClick={() => onToggle(item.id)}
+            className="absolute cursor-pointer flex items-center justify-center"
+            style={{ top: '8px', right: '8px', width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#E4002B', border: 'none', zIndex: 2 }}
+          >
+            <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+          </button>
+
+          {/* Left: Image with red border */}
+          <div className="relative shrink-0 overflow-hidden" style={{ width: '110px', height: '110px', borderRadius: '16px', border: '2px solid #E4002B' }}>
+            {item.imageUrl ? (
+              <Image src={item.imageUrl} alt={item.name} fill sizes="110px" className="object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#F5F5F5' }}><span style={{ color: '#999', fontSize: '12px' }}>No image</span></div>
+            )}
+          </div>
+
+          {/* Right: Details with alternating rows */}
+          <div className="flex flex-col flex-1 min-w-0" style={{ paddingRight: '20px' }}>
+            <h3 style={{ fontFamily: 'var(--font-oswald)', fontSize: '15px', fontWeight: 700, color: '#1A1A1A', marginBottom: '8px' }}>{item.name}</h3>
+
+            {item.subItems ? (
+              <div className="flex flex-col gap-1">
+                {item.subItems.map((sub, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between"
+                    style={{
+                      padding: '5px 10px',
+                      borderRadius: '8px',
+                      backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#FFF0F0',
+                    }}
+                  >
+                    <span style={{ fontFamily: 'var(--font-work-sans)', fontSize: '12px', color: '#333' }}>{sub.name}</span>
+                    <span className="rounded-full" style={{ fontFamily: 'var(--font-work-sans)', fontSize: '11px', fontWeight: 700, color: '#E4002B', backgroundColor: i % 2 === 0 ? '#FFF0F0' : '#FFE0E6', padding: '2px 10px' }}>{formatPrice(sub.price)}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <>
+                <p style={{ fontFamily: 'var(--font-work-sans)', fontSize: '12px', color: '#666', lineHeight: 1.5, marginBottom: '8px' }}>{item.description}</p>
+                <span className="inline-block rounded-full self-start" style={{ fontFamily: 'var(--font-work-sans)', fontSize: '11px', fontWeight: 700, color: '#E4002B', backgroundColor: '#FFE0E6', padding: '2px 10px' }}>{formatPrice(item.price)}</span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SubItemCarouselH({ category }) {
+  const { ref, canScrollLeft, canScrollRight, scrollLeft, scrollRight } = useHorizontalScroll(280);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [expandedId, setExpandedId] = useState(null);
+  const [containerWidth, setContainerWidth] = useState(320);
+
+  const handleScroll = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    setScrollProgress(max > 0 ? el.scrollLeft / max : 0);
+  }, [ref]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    setContainerWidth(el.clientWidth);
+    const ro = new ResizeObserver(() => setContainerWidth(el.clientWidth));
+    ro.observe(el);
+    return () => { el.removeEventListener('scroll', handleScroll); ro.disconnect(); };
+  }, [handleScroll, ref]);
+
+  const handleToggle = (id) => setExpandedId(expandedId === id ? null : id);
+
+  return (
+    <div className="mb-8">
+      <div className="flex items-center justify-between mb-3">
+        <h3 style={{ fontFamily: 'var(--font-oswald)', fontSize: '1.375rem', fontWeight: 700, color: '#1A1A1A' }}>{category.name}</h3>
+        <span style={{ fontFamily: 'var(--font-work-sans)', fontSize: '12px', fontWeight: 500, color: '#E4002B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{category.items.length} items</span>
+      </div>
+      <div style={{ height: '2px', backgroundColor: '#EEE', borderRadius: '1px', marginBottom: '14px' }}>
+        <div style={{ height: '100%', backgroundColor: '#E4002B', borderRadius: '1px', width: `${Math.max(20, scrollProgress * 100)}%`, transition: 'width 0.1s ease-out' }} />
+      </div>
+      <div className="relative">
+        {canScrollLeft && (
+          <button onClick={scrollLeft} className="absolute left-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110" style={{ width: '32px', height: '56px', borderRadius: '0 8px 8px 0', backgroundColor: 'rgba(228,0,43,0.9)', border: 'none', boxShadow: '2px 0 8px rgba(0,0,0,0.15)' }}>
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+          </button>
+        )}
+        {canScrollRight && (
+          <button onClick={scrollRight} className="absolute right-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110" style={{ width: '32px', height: '56px', borderRadius: '8px 0 0 8px', backgroundColor: 'rgba(228,0,43,0.9)', border: 'none', boxShadow: '-2px 0 8px rgba(0,0,0,0.15)' }}>
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 6 15 12 9 18" /></svg>
+          </button>
+        )}
+        <div ref={ref} className="flex gap-3 overflow-x-auto hide-scrollbar" style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', padding: '4px 0' }}>
+          {category.items.map((item) => (
+            <SubItemCardH key={item.id} item={item} isExpanded={expandedId === item.id} onToggle={handleToggle} expandedWidth={containerWidth - 8} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Design I: Card Takeover ─────────────────────────────────────────
+
+function SubItemCardI({ item, isExpanded, onToggle, expandedWidth }) {
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    if (isExpanded && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      const timer = setTimeout(() => {
+        cardRef.current?.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      }, 370);
+      return () => clearTimeout(timer);
+    }
+  }, [isExpanded]);
+
+  return (
+    <div
+      ref={cardRef}
+      className="shrink-0 flex flex-col items-center cursor-pointer"
+      onClick={() => onToggle(item.id)}
+      style={{
+        scrollSnapAlign: 'start',
+        width: isExpanded ? `${expandedWidth}px` : '130px',
+        transition: 'width 0.35s cubic-bezier(0.4,0,0.2,1)',
+        overflow: 'hidden',
+      }}
+    >
+      {!isExpanded && (
+        <div className="flex flex-col items-center" style={{ width: '130px' }}>
+          <div
+            className="relative overflow-hidden transition-all duration-200 hover:-translate-y-1"
+            style={{ width: '120px', height: '120px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', backgroundColor: '#fff', padding: '4px' }}
+          >
+            <div className="relative w-full h-full overflow-hidden" style={{ borderRadius: '10px' }}>
+              {item.imageUrl ? (
+                <Image src={item.imageUrl} alt={item.name} fill sizes="120px" className="object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#F5F5F5' }}><span style={{ color: '#999', fontSize: '12px' }}>No image</span></div>
+              )}
+            </div>
+          </div>
+          <h3 className="text-center line-clamp-2 mt-2" style={{ fontFamily: 'var(--font-work-sans)', fontSize: '12px', fontWeight: 600, color: '#1A1A1A', lineHeight: 1.3, textTransform: 'uppercase' }}>{item.name}</h3>
+          <span className="mt-1 inline-block rounded-full" style={{ fontFamily: 'var(--font-work-sans)', fontSize: '11px', fontWeight: 700, color: '#E4002B', backgroundColor: '#FFF0F0', padding: '2px 10px' }}>{formatPrice(item.price)}</span>
+        </div>
+      )}
+
+      {isExpanded && (
+        <div
+          className="flex gap-4 relative"
+          style={{
+            width: '100%',
+            backgroundColor: '#FFFFFF',
+            borderRadius: '16px',
+            padding: '14px',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
+            animation: 'fadeIn 0.3s ease',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Close button — red with shadow */}
+          <button
+            onClick={() => onToggle(item.id)}
+            className="absolute cursor-pointer flex items-center justify-center"
+            style={{ top: '8px', right: '8px', width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#E4002B', border: 'none', zIndex: 2, boxShadow: '0 2px 8px rgba(228,0,43,0.3)' }}
+          >
+            <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+          </button>
+
+          {/* Left: Image with red accent border */}
+          <div className="relative shrink-0 overflow-hidden" style={{ width: '110px', height: '110px', borderRadius: '14px', border: '3px solid #E4002B' }}>
+            {item.imageUrl ? (
+              <Image src={item.imageUrl} alt={item.name} fill sizes="110px" className="object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#F5F5F5' }}><span style={{ color: '#999', fontSize: '12px' }}>No image</span></div>
+            )}
+          </div>
+
+          {/* Right: Details with chips */}
+          <div className="flex flex-col flex-1 min-w-0" style={{ paddingRight: '24px' }}>
+            <h3 style={{ fontFamily: 'var(--font-oswald)', fontSize: '15px', fontWeight: 700, color: '#1A1A1A', display: 'inline-block', borderBottom: '2px solid #E4002B', paddingBottom: '4px', marginBottom: '10px', alignSelf: 'flex-start' }}>{item.name}</h3>
+
+            {item.subItems ? (
+              <div className="flex flex-wrap gap-2">
+                {item.subItems.map((sub, i) => (
+                  <div
+                    key={i}
+                    className="inline-flex items-center gap-1.5"
+                    style={{ borderRadius: '20px', backgroundColor: '#F5F5F5', padding: '5px 12px', border: '1px solid #EEEEEE' }}
+                  >
+                    <span style={{ fontFamily: 'var(--font-work-sans)', fontSize: '11px', color: '#333' }}>{sub.name}</span>
+                    <span style={{ fontFamily: 'var(--font-work-sans)', fontSize: '11px', fontWeight: 700, color: '#E4002B' }}>{formatPrice(sub.price)}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <>
+                <p style={{ fontFamily: 'var(--font-work-sans)', fontSize: '12px', color: '#666', lineHeight: 1.5, marginBottom: '8px' }}>{item.description}</p>
+                <span style={{ fontFamily: 'var(--font-work-sans)', fontSize: '14px', fontWeight: 700, color: '#E4002B' }}>{formatPrice(item.price)}</span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SubItemCarouselI({ category }) {
+  const { ref, canScrollLeft, canScrollRight, scrollLeft, scrollRight } = useHorizontalScroll(280);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [expandedId, setExpandedId] = useState(null);
+  const [containerWidth, setContainerWidth] = useState(320);
+
+  const handleScroll = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    setScrollProgress(max > 0 ? el.scrollLeft / max : 0);
+  }, [ref]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    setContainerWidth(el.clientWidth);
+    const ro = new ResizeObserver(() => setContainerWidth(el.clientWidth));
+    ro.observe(el);
+    return () => { el.removeEventListener('scroll', handleScroll); ro.disconnect(); };
+  }, [handleScroll, ref]);
+
+  const handleToggle = (id) => setExpandedId(expandedId === id ? null : id);
+
+  return (
+    <div className="mb-8">
+      <div className="flex items-center justify-between mb-3">
+        <h3 style={{ fontFamily: 'var(--font-oswald)', fontSize: '1.375rem', fontWeight: 700, color: '#1A1A1A' }}>{category.name}</h3>
+        <span style={{ fontFamily: 'var(--font-work-sans)', fontSize: '12px', fontWeight: 500, color: '#E4002B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{category.items.length} items</span>
+      </div>
+      <div style={{ height: '2px', backgroundColor: '#EEE', borderRadius: '1px', marginBottom: '14px' }}>
+        <div style={{ height: '100%', backgroundColor: '#E4002B', borderRadius: '1px', width: `${Math.max(20, scrollProgress * 100)}%`, transition: 'width 0.1s ease-out' }} />
+      </div>
+      <div className="relative">
+        {canScrollLeft && (
+          <button onClick={scrollLeft} className="absolute left-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110" style={{ width: '32px', height: '56px', borderRadius: '0 8px 8px 0', backgroundColor: 'rgba(228,0,43,0.9)', border: 'none', boxShadow: '2px 0 8px rgba(0,0,0,0.15)' }}>
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+          </button>
+        )}
+        {canScrollRight && (
+          <button onClick={scrollRight} className="absolute right-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110" style={{ width: '32px', height: '56px', borderRadius: '8px 0 0 8px', backgroundColor: 'rgba(228,0,43,0.9)', border: 'none', boxShadow: '-2px 0 8px rgba(0,0,0,0.15)' }}>
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 6 15 12 9 18" /></svg>
+          </button>
+        )}
+        <div ref={ref} className="flex gap-3 overflow-x-auto hide-scrollbar" style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', padding: '4px 0' }}>
+          {category.items.map((item) => (
+            <SubItemCardI key={item.id} item={item} isExpanded={expandedId === item.id} onToggle={handleToggle} expandedWidth={containerWidth - 8} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Design J: Description + Sub-Items Combined ─────────────────────
+
+function SubItemCardJ({ item, isExpanded, onToggle, expandedWidth }) {
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    if (isExpanded && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      const timer = setTimeout(() => {
+        cardRef.current?.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      }, 370);
+      return () => clearTimeout(timer);
+    }
+  }, [isExpanded]);
+
+  return (
+    <div
+      ref={cardRef}
+      className="shrink-0 flex flex-col items-center cursor-pointer"
+      onClick={() => onToggle(item.id)}
+      style={{
+        scrollSnapAlign: 'start',
+        width: isExpanded ? `${expandedWidth}px` : '130px',
+        transition: 'width 0.35s cubic-bezier(0.4,0,0.2,1)',
+        overflow: 'hidden',
+      }}
+    >
+      {!isExpanded && (
+        <div className="flex flex-col items-center" style={{ width: '130px' }}>
+          <div className="relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg" style={{ width: '120px', height: '120px', borderRadius: '20px', boxShadow: '0 2px 12px rgba(0,0,0,0.1)' }}>
+            {item.imageUrl ? (
+              <Image src={item.imageUrl} alt={item.name} fill sizes="120px" className="object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#F5F5F5' }}><span style={{ color: '#999', fontSize: '12px' }}>No image</span></div>
+            )}
+          </div>
+          <h3 className="text-center line-clamp-2 mt-2" style={{ fontFamily: 'var(--font-work-sans)', fontSize: '12px', fontWeight: 600, color: '#1A1A1A', lineHeight: 1.3, textTransform: 'uppercase' }}>{item.name}</h3>
+          <span className="mt-1 inline-block rounded-full" style={{ fontFamily: 'var(--font-work-sans)', fontSize: '11px', fontWeight: 700, color: '#E4002B', backgroundColor: '#FFF0F0', padding: '2px 10px' }}>{formatPrice(item.price)}</span>
+        </div>
+      )}
+
+      {isExpanded && (
+        <div
+          className="relative"
+          style={{
+            width: '100%',
+            backgroundColor: '#FFFFFF',
+            borderRadius: '16px',
+            padding: '14px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+            border: '1px solid #F0F0F0',
+            animation: 'fadeIn 0.3s ease',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Close button */}
+          <button
+            onClick={() => onToggle(item.id)}
+            className="absolute cursor-pointer flex items-center justify-center"
+            style={{ top: '8px', right: '8px', width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#F0F0F0', border: 'none', zIndex: 2 }}
+          >
+            <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+          </button>
+
+          {/* Top row: image + name + description */}
+          <div className="flex gap-3 mb-3">
+            {/* Image */}
+            <div className="relative shrink-0 overflow-hidden" style={{ width: '100px', height: '100px', borderRadius: '14px' }}>
+              {item.imageUrl ? (
+                <Image src={item.imageUrl} alt={item.name} fill sizes="100px" className="object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#F5F5F5' }}><span style={{ color: '#999', fontSize: '12px' }}>No image</span></div>
+              )}
+            </div>
+
+            {/* Name + description */}
+            <div className="flex flex-col flex-1 min-w-0" style={{ paddingRight: '20px' }}>
+              <h3 style={{ fontFamily: 'var(--font-oswald)', fontSize: '16px', fontWeight: 700, color: '#1A1A1A', marginBottom: '4px' }}>{item.name}</h3>
+              {item.description && (
+                <p style={{ fontFamily: 'var(--font-work-sans)', fontSize: '11px', color: '#888', lineHeight: 1.4, fontStyle: 'italic' }}>{item.description}</p>
+              )}
+              {/* Single price if no sub-items */}
+              {!item.subItems && (
+                <span className="mt-2" style={{ fontFamily: 'var(--font-work-sans)', fontSize: '14px', fontWeight: 700, color: '#E4002B' }}>{formatPrice(item.price)}</span>
+              )}
+            </div>
+          </div>
+
+          {/* Sub-items list below */}
+          {item.subItems && (
+            <>
+              <div style={{ height: '1px', backgroundColor: '#EEEEEE', margin: '0 0 8px' }} />
+              <div className="flex flex-col">
+                {item.subItems.map((sub, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between"
+                    style={{ padding: '6px 4px', borderBottom: i < item.subItems.length - 1 ? '1px solid #F5F5F5' : 'none' }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#22C55E', flexShrink: 0 }} />
+                      <span style={{ fontFamily: 'var(--font-work-sans)', fontSize: '13px', color: '#333' }}>{sub.name}</span>
+                    </div>
+                    <span style={{ fontFamily: 'var(--font-work-sans)', fontSize: '13px', fontWeight: 700, color: '#1A1A1A' }}>{formatPrice(sub.price)}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SubItemCarouselJ({ category }) {
+  const { ref, canScrollLeft, canScrollRight, scrollLeft, scrollRight } = useHorizontalScroll(280);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [expandedId, setExpandedId] = useState(null);
+  const [containerWidth, setContainerWidth] = useState(320);
+
+  const handleScroll = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    setScrollProgress(max > 0 ? el.scrollLeft / max : 0);
+  }, [ref]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    setContainerWidth(el.clientWidth);
+    const ro = new ResizeObserver(() => setContainerWidth(el.clientWidth));
+    ro.observe(el);
+    return () => { el.removeEventListener('scroll', handleScroll); ro.disconnect(); };
+  }, [handleScroll, ref]);
+
+  const handleToggle = (id) => setExpandedId(expandedId === id ? null : id);
+
+  return (
+    <div className="mb-8">
+      <div className="flex items-center justify-between mb-3">
+        <h3 style={{ fontFamily: 'var(--font-oswald)', fontSize: '1.375rem', fontWeight: 700, color: '#1A1A1A' }}>{category.name}</h3>
+        <span style={{ fontFamily: 'var(--font-work-sans)', fontSize: '12px', fontWeight: 500, color: '#E4002B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{category.items.length} items</span>
+      </div>
+      <div style={{ height: '2px', backgroundColor: '#EEE', borderRadius: '1px', marginBottom: '14px' }}>
+        <div style={{ height: '100%', backgroundColor: '#E4002B', borderRadius: '1px', width: `${Math.max(20, scrollProgress * 100)}%`, transition: 'width 0.1s ease-out' }} />
+      </div>
+      <div className="relative">
+        {canScrollLeft && (
+          <button onClick={scrollLeft} className="absolute left-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110" style={{ width: '32px', height: '56px', borderRadius: '0 8px 8px 0', backgroundColor: 'rgba(228,0,43,0.9)', border: 'none', boxShadow: '2px 0 8px rgba(0,0,0,0.15)' }}>
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+          </button>
+        )}
+        {canScrollRight && (
+          <button onClick={scrollRight} className="absolute right-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110" style={{ width: '32px', height: '56px', borderRadius: '8px 0 0 8px', backgroundColor: 'rgba(228,0,43,0.9)', border: 'none', boxShadow: '-2px 0 8px rgba(0,0,0,0.15)' }}>
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 6 15 12 9 18" /></svg>
+          </button>
+        )}
+        <div ref={ref} className="flex gap-3 overflow-x-auto hide-scrollbar" style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', padding: '4px 0' }}>
+          {category.items.map((item) => (
+            <SubItemCardJ key={item.id} item={item} isExpanded={expandedId === item.id} onToggle={handleToggle} expandedWidth={containerWidth - 8} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════
 //  PREVIEW PAGE
 // ═══════════════════════════════════════════════════════════════════════
 
@@ -1990,6 +2666,50 @@ export default function PreviewPage() {
             <div style={{ padding: '20px 16px', backgroundColor: '#FAFAFA' }}>
               {SCROLL_CATEGORIES.map((cat) => (
                 <DescCarouselC key={cat.name} category={cat} />
+              ))}
+            </div>
+          </PreviewFrame>
+        </section>
+
+        {/* ── SUB-ITEM EXPAND CAROUSELS ─────────────────────────── */}
+        <section className="mb-20">
+          <SectionTitle title="Sub-Item Expand Designs" />
+          <p className="mb-8" style={{ fontFamily: 'var(--font-work-sans)', fontSize: '14px', color: '#666666', marginTop: '-20px' }}>
+            Items with variants (sizes, flavors) expand to full width showing sub-item options with individual prices. Click any item to expand — image on left, details on right.
+          </p>
+
+          <VariantLabel label="Design G" description="Clean List Expand — green dot indicators, thin dividers, right-aligned prices. Closest to reference." />
+          <PreviewFrame>
+            <div style={{ padding: '20px 16px', backgroundColor: '#FAFAFA' }}>
+              {SCROLL_CATEGORIES.map((cat) => (
+                <SubItemCarouselG key={cat.name} category={cat} />
+              ))}
+            </div>
+          </PreviewFrame>
+
+          <VariantLabel label="Design H" description="Slide Panel Expand — pink background, alternating row colors, red price pills." />
+          <PreviewFrame>
+            <div style={{ padding: '20px 16px', backgroundColor: '#FAFAFA' }}>
+              {SCROLL_CATEGORIES.map((cat) => (
+                <SubItemCarouselH key={cat.name} category={cat} />
+              ))}
+            </div>
+          </PreviewFrame>
+
+          <VariantLabel label="Design I" description="Card Takeover — elevated shadow, red accent border on image, sub-items as compact chips." />
+          <PreviewFrame>
+            <div style={{ padding: '20px 16px', backgroundColor: '#FAFAFA' }}>
+              {SCROLL_CATEGORIES.map((cat) => (
+                <SubItemCarouselI key={cat.name} category={cat} />
+              ))}
+            </div>
+          </PreviewFrame>
+
+          <VariantLabel label="Design J" description="Description + Sub-Items Combined — shows both description AND sub-item variants together. Image + name + description on top, sub-items listed below." />
+          <PreviewFrame>
+            <div style={{ padding: '20px 16px', backgroundColor: '#FAFAFA' }}>
+              {SCROLL_CATEGORIES.map((cat) => (
+                <SubItemCarouselJ key={cat.name} category={cat} />
               ))}
             </div>
           </PreviewFrame>
