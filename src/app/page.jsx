@@ -1,8 +1,13 @@
 import prisma from '@/lib/prisma';
-import Header from '@/components/public/Header';
 import Footer from '@/components/public/Footer';
-import CategoryTabs from '@/components/public/CategoryTabs';
-import MenuCarousel from '@/components/public/MenuCarousel';
+import MenuPreview from '@/components/public/MenuPreview';
+
+const SAUCE_KEYWORDS = ['sauce', 'mayonnaise', 'mayo', 'coleslaw'];
+
+function isSauceItem(name) {
+  const lower = name.toLowerCase();
+  return SAUCE_KEYWORDS.some((kw) => lower.includes(kw));
+}
 
 export default async function HomePage() {
   const [categories, socialLinks] = await Promise.all([
@@ -26,52 +31,72 @@ export default async function HomePage() {
   ]);
 
   const socialMap = {};
-  socialLinks.forEach((link) => { socialMap[link.platform] = link.value; });
+  socialLinks.forEach((link) => {
+    socialMap[link.platform] = link.value;
+  });
 
-  // Filter out categories with no active items and serialize Decimal prices
-  const visibleCategories = categories
-    .filter((cat) => cat.items.length > 0)
-    .map((cat) => ({
-      ...cat,
-      items: cat.items.map((item) => ({
-        ...item,
-        price: item.price.toString(),
-        subItems: item.subItems.map((sub) => ({
-          ...sub,
-          price: sub.price.toString(),
-        })),
-      })),
-    }));
+  // Transform DB data into the menu format
+  const menuCategories = [];
+  const sauceItems = [];
+
+  for (const cat of categories) {
+    if (cat.items.length === 0) continue;
+
+    const regularItems = [];
+
+    for (const item of cat.items) {
+      // Separate sauce-type items into their own category
+      if (isSauceItem(item.name)) {
+        sauceItems.push({
+          id: item.id.toString(),
+          name: item.name,
+          imageUrl: item.imageUrl,
+          price: parseFloat(item.price.toString()),
+        });
+        continue;
+      }
+
+      const hasVariants = item.subItems && item.subItems.length > 0;
+
+      regularItems.push({
+        id: item.id.toString(),
+        name: item.name,
+        desc: item.description || '',
+        imageUrl: item.imageUrl,
+        price: hasVariants ? undefined : parseFloat(item.price.toString()),
+        variants: hasVariants
+          ? item.subItems.map((sub) => ({
+              label: sub.name,
+              price: parseFloat(sub.price.toString()),
+            }))
+          : undefined,
+      });
+    }
+
+    if (regularItems.length > 0) {
+      const hasAnyVariants = regularItems.some((i) => i.variants);
+      menuCategories.push({
+        id: cat.slug,
+        name: cat.name,
+        layout: hasAnyVariants ? 'grid' : 'list',
+        items: regularItems,
+      });
+    }
+  }
+
+  // Add sauces as a separate category at the end
+  if (sauceItems.length > 0) {
+    menuCategories.push({
+      id: 'sauces',
+      name: 'Sauces',
+      layout: 'sauce',
+      items: sauceItems,
+    });
+  }
 
   return (
     <>
-      <Header phone={socialMap.phone} />
-      {visibleCategories.length === 0 ? (
-        <div className="flex items-center justify-center" style={{ minHeight: 'calc(100vh - 72px)' }}>
-          <p style={{ fontSize: '18px', color: '#666666' }}>Menu coming soon!</p>
-        </div>
-      ) : (
-        <>
-          <CategoryTabs categories={visibleCategories.map(({ id, name, slug }) => ({ id, name, slug }))} />
-          <div className="max-w-[1200px] mx-auto px-4 md:px-6 pt-6 pb-8">
-            {visibleCategories.map((category) => (
-              <section
-                key={category.slug}
-                id={category.slug}
-                style={{
-                  scrollMarginTop: '120px',
-                  minHeight: '320px',
-                  paddingTop: '32px',
-                  paddingBottom: '48px',
-                  borderBottom: '1px solid #F0F0F0',
-                }}
-              >
-                <MenuCarousel category={category} />
-              </section>
-            ))}
-          </div>
-        </>
-      )}
+      <MenuPreview categories={menuCategories} />
       <Footer socialLinks={socialMap} />
     </>
   );

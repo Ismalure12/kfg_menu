@@ -60,6 +60,19 @@ model SubItem {
   @@map("sub_items")
 }
 
+model CartItem {
+  id           Int      @id @default(autoincrement())
+  cartId       String   @map("cart_id")
+  itemName     String   @map("item_name")
+  variantLabel String?  @map("variant_label")
+  price        Decimal  @db.Decimal(10, 2)
+  quantity     Int      @default(1)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([cartId])
+  @@map("cart_items")
+}
+
 model SocialLink {
   id        Int      @id @default(autoincrement())
   platform  String   @unique
