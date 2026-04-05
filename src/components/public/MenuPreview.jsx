@@ -719,7 +719,7 @@ export default function MenuPreview({ categories }) {
         .search-input {
           width: 100%;
           padding: 11px 16px;
-          font-size: 14px;
+          font-size: 16px; /* Must be ≥16px to prevent iOS auto-zoom */
           border: 1.5px solid #EEE;
           border-radius: 14px;
           outline: none;
@@ -727,13 +727,16 @@ export default function MenuPreview({ categories }) {
           background: #FAFAFA;
           transition: border-color 0.15s, box-shadow 0.15s;
           color: #1A1A1A;
+          -webkit-appearance: none;
+          appearance: none;
+          transform: translateZ(0); /* prevent layout shift on focus */
         }
         .search-input:focus {
           border-color: #E4002B;
           box-shadow: 0 0 0 3px rgba(228,0,43,0.08);
           background: #fff;
         }
-        .search-input::placeholder { color: #BBBB; }
+        .search-input::placeholder { color: #BBBBBB; font-size: 15px; }
 
         /* Responsive grid */
         .menu-grid {
@@ -798,7 +801,13 @@ export default function MenuPreview({ categories }) {
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 {/* Search toggle */}
                 <button
-                  onClick={() => { setSearchOpen(!searchOpen); setSearchQuery(''); setActiveCategory(null); }}
+                  onClick={() => {
+                    const opening = !searchOpen;
+                    setSearchOpen(opening);
+                    setSearchQuery('');
+                    setActiveCategory(null);
+                    if (opening) window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
                   style={{
                     width: 40, height: 40, borderRadius: 12,
                     background: searchOpen ? '#FFF0F0' : '#F5F5F5',
@@ -861,7 +870,12 @@ export default function MenuPreview({ categories }) {
             <div ref={catStripRef} className="hide-scrollbar" style={{ display: 'flex', overflowX: 'auto' }}>
               <button
                 className={`tab-btn${!activeCategory ? ' active' : ''}`}
-                onClick={() => { setActiveCategory(null); setSearchQuery(''); setSearchOpen(false); }}
+                onClick={() => {
+                  setActiveCategory(null);
+                  setSearchQuery('');
+                  setSearchOpen(false);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
               >
                 All
               </button>
@@ -874,6 +888,7 @@ export default function MenuPreview({ categories }) {
                     setActiveCategory(activeCategory === cat.id ? null : cat.id);
                     setSearchQuery('');
                     setSearchOpen(false);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                 >
                   {cat.name}
@@ -886,21 +901,62 @@ export default function MenuPreview({ categories }) {
         {/* ── Content ──────────────────────────────────────────────────────── */}
         <div className="menu-content">
 
-          {/* Empty search state */}
-          {filteredCategories.length === 0 && (
+          {/* ── Search results mode ────────────────────────────────────────── */}
+          {searchQuery.trim() && (() => {
+            const allMatches = categories.flatMap((cat) =>
+              cat.items
+                .filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map((item) => ({ ...item, _catName: cat.name, _layout: cat.layout }))
+            );
+            if (allMatches.length === 0) {
+              return (
+                <div style={{ textAlign: 'center', padding: '80px 24px' }}>
+                  <div style={{ fontSize: 48, marginBottom: 14 }}>🔍</div>
+                  <p style={{
+                    fontFamily: 'var(--font-oswald), sans-serif',
+                    fontSize: 18, fontWeight: 700, color: '#AAA', marginBottom: 6,
+                  }}>No items found</p>
+                  <p style={{ fontSize: 13, color: '#CCC' }}>Try a different search term</p>
+                </div>
+              );
+            }
+            return (
+              <div>
+                <p style={{
+                  fontSize: 13, color: '#AAA', padding: '18px 4px 12px',
+                  fontFamily: 'var(--font-work-sans), sans-serif',
+                }}>
+                  {allMatches.length} result{allMatches.length !== 1 ? 's' : ''} for &ldquo;{searchQuery}&rdquo;
+                </p>
+                <div className="menu-grid">
+                  {allMatches.map((item) => (
+                    <GridCard
+                      key={item.id}
+                      item={item}
+                      onAdd={addToCart}
+                      selectedVariants={selectedVariants}
+                      setSelectedVariant={setSelectedVariant}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* ── Normal / category-filtered mode ───────────────────────────── */}
+          {!searchQuery.trim() && filteredCategories.length === 0 && (
             <div style={{ textAlign: 'center', padding: '80px 24px', color: '#CCC' }}>
-              <div style={{ fontSize: 48, marginBottom: 14 }}>🔍</div>
+              <div style={{ fontSize: 48, marginBottom: 14 }}>🍽️</div>
               <p style={{
                 fontFamily: 'var(--font-oswald), sans-serif',
                 fontSize: 18, fontWeight: 700, color: '#AAA', marginBottom: 6,
               }}>
-                No items found
+                Menu coming soon!
               </p>
-              <p style={{ fontSize: 13, color: '#CCC' }}>Try searching something else</p>
             </div>
           )}
 
-          {filteredCategories.map((cat) => (
+          {!searchQuery.trim() && filteredCategories.map((cat) => (
             <div
               key={cat.id}
               ref={(el) => (sectionRefs.current[cat.id] = el)}
