@@ -7,7 +7,9 @@ export default function CategoriesPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState({ name: '', sortOrder: 0, isActive: true });
+  const [form, setForm] = useState({ name: '', sortOrder: 0, isActive: true, imageUrl: '' });
+  const [imagePreview, setImagePreview] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const loadCategories = useCallback(async () => {
     const res = await fetch('/api/categories');
@@ -19,27 +21,51 @@ export default function CategoriesPage() {
   useEffect(() => { loadCategories(); }, [loadCategories]);
 
   const resetForm = () => {
-    setForm({ name: '', sortOrder: 0, isActive: true });
+    setForm({ name: '', sortOrder: 0, isActive: true, imageUrl: '' });
     setEditingId(null);
     setShowForm(false);
+    setImagePreview(null);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    setImagePreview(URL.createObjectURL(file));
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.url) setForm((prev) => ({ ...prev, imageUrl: data.url }));
+    } catch {
+      alert('Image upload failed');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const payload = { name: form.name, sortOrder: Number(form.sortOrder), isActive: form.isActive };
+    const payload = { name: form.name, sortOrder: Number(form.sortOrder), isActive: form.isActive, imageUrl: form.imageUrl || null };
 
-    if (editingId) {
-      await fetch(`/api/categories/${editingId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-    } else {
-      await fetch('/api/categories', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+    try {
+      const res = await fetch(
+        editingId ? `/api/categories/${editingId}` : '/api/categories',
+        {
+          method: editingId ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || `Failed (${res.status})`);
+        return;
+      }
+    } catch {
+      alert('Network error — please try again');
+      return;
     }
 
     resetForm();
@@ -47,7 +73,8 @@ export default function CategoriesPage() {
   };
 
   const handleEdit = (cat) => {
-    setForm({ name: cat.name, sortOrder: cat.sortOrder, isActive: cat.isActive });
+    setForm({ name: cat.name, sortOrder: cat.sortOrder, isActive: cat.isActive, imageUrl: cat.imageUrl || '' });
+    setImagePreview(cat.imageUrl || null);
     setEditingId(cat.id);
     setShowForm(true);
   };
@@ -120,6 +147,34 @@ export default function CategoriesPage() {
                   className="w-full border rounded-lg px-3 py-2 text-sm"
                   style={{ borderColor: '#E5E5E5' }}
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Category Image</label>
+                <div className="flex items-center gap-3">
+                  {imagePreview && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={imagePreview}
+                      alt="preview"
+                      className="rounded-lg object-cover flex-shrink-0"
+                      style={{ width: 56, height: 56, border: '1px solid #E5E5E5' }}
+                    />
+                  )}
+                  <label
+                    className="flex-1 flex items-center justify-center gap-2 border rounded-lg px-3 py-2 text-sm cursor-pointer"
+                    style={{ borderColor: '#E5E5E5', borderStyle: 'dashed', color: '#666' }}
+                  >
+                    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    {uploading ? 'Uploading…' : imagePreview ? 'Change image' : 'Upload image'}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                      disabled={uploading}
+                    />
+                  </label>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Sort Order</label>
@@ -208,7 +263,17 @@ export default function CategoriesPage() {
           <tbody>
             {categories.map((cat) => (
               <tr key={cat.id} className="border-b last:border-0" style={{ borderColor: '#E5E5E5' }}>
-                <td className="px-4 py-3 font-medium">{cat.name}</td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    {cat.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={cat.imageUrl} alt="" className="rounded-full object-cover flex-shrink-0" style={{ width: 28, height: 28 }} />
+                    ) : (
+                      <div className="rounded-full flex-shrink-0 flex items-center justify-center text-xs" style={{ width: 28, height: 28, background: '#F5F5F5', color: '#AAA' }}>?</div>
+                    )}
+                    <span className="font-medium">{cat.name}</span>
+                  </div>
+                </td>
                 <td className="px-4 py-3 text-gray-500">{cat.slug}</td>
                 <td className="px-4 py-3">{cat.sortOrder}</td>
                 <td className="px-4 py-3">
@@ -241,7 +306,15 @@ export default function CategoriesPage() {
         {categories.map((cat) => (
           <div key={cat.id} className="bg-white rounded-lg border p-4" style={{ borderColor: '#E5E5E5' }}>
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-medium text-sm" style={{ color: '#1A1A1A' }}>{cat.name}</h3>
+              <div className="flex items-center gap-2">
+                {cat.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={cat.imageUrl} alt="" className="rounded-full object-cover flex-shrink-0" style={{ width: 28, height: 28 }} />
+                ) : (
+                  <div className="rounded-full flex-shrink-0 flex items-center justify-center text-xs" style={{ width: 28, height: 28, background: '#F5F5F5', color: '#AAA' }}>?</div>
+                )}
+                <h3 className="font-medium text-sm" style={{ color: '#1A1A1A' }}>{cat.name}</h3>
+              </div>
               <button
                 onClick={() => handleToggleActive(cat)}
                 className="text-xs px-2 py-1 rounded-full font-medium"

@@ -2,13 +2,6 @@ import prisma from '@/lib/prisma';
 import Footer from '@/components/public/Footer';
 import MenuPreview from '@/components/public/MenuPreview';
 
-const SAUCE_KEYWORDS = ['sauce', 'mayonnaise', 'mayo', 'coleslaw'];
-
-function isSauceItem(name) {
-  const lower = name.toLowerCase();
-  return SAUCE_KEYWORDS.some((kw) => lower.includes(kw));
-}
-
 export default async function HomePage() {
   const [categories, socialLinks] = await Promise.all([
     prisma.category.findMany({
@@ -37,28 +30,13 @@ export default async function HomePage() {
 
   // Transform DB data into the menu format
   const menuCategories = [];
-  const sauceItems = [];
 
   for (const cat of categories) {
     if (cat.items.length === 0) continue;
 
-    const regularItems = [];
-
-    for (const item of cat.items) {
-      // Separate sauce-type items into their own category
-      if (isSauceItem(item.name)) {
-        sauceItems.push({
-          id: item.id.toString(),
-          name: item.name,
-          imageUrl: item.imageUrl,
-          price: parseFloat(item.price.toString()),
-        });
-        continue;
-      }
-
+    const items = cat.items.map((item) => {
       const hasVariants = item.subItems && item.subItems.length > 0;
-
-      regularItems.push({
+      return {
         id: item.id.toString(),
         name: item.name,
         desc: item.description || '',
@@ -70,27 +48,16 @@ export default async function HomePage() {
               price: parseFloat(sub.price.toString()),
             }))
           : undefined,
-      });
-    }
+      };
+    });
 
-    if (regularItems.length > 0) {
-      const hasAnyVariants = regularItems.some((i) => i.variants);
-      menuCategories.push({
-        id: cat.slug,
-        name: cat.name,
-        layout: hasAnyVariants ? 'grid' : 'list',
-        items: regularItems,
-      });
-    }
-  }
-
-  // Add sauces as a separate category at the end
-  if (sauceItems.length > 0) {
+    const hasAnyVariants = items.some((i) => i.variants);
     menuCategories.push({
-      id: 'sauces',
-      name: 'Sauces',
-      layout: 'sauce',
-      items: sauceItems,
+      id: cat.slug,
+      name: cat.name,
+      imageUrl: cat.imageUrl ?? null,
+      layout: hasAnyVariants ? 'grid' : 'list',
+      items,
     });
   }
 

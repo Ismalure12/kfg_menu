@@ -330,19 +330,20 @@ function ListRow({ item, onAdd, selectedVariants, setSelectedVariant, animDelay 
 }
 
 // ─── Sauce Pill ───────────────────────────────────────────────────────────────
-function SaucePill({ item }) {
+function SaucePill({ item, onAdd }) {
   const [hovered, setHovered] = useState(false);
+  const [pressed, setPressed] = useState(false);
   return (
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
         display: 'flex', alignItems: 'center', gap: 10,
-        padding: '10px 18px', borderRadius: 40,
+        padding: '8px 10px 8px 10px', borderRadius: 40,
         background: hovered ? '#FFF8F8' : '#FAFAFA',
         border: hovered ? '1px solid #FFD0D0' : '1px solid #F0EEEC',
         boxShadow: hovered ? '0 4px 12px rgba(228,0,43,0.08)' : 'none',
-        transition: 'all 0.18s ease', cursor: 'default',
+        transition: 'all 0.18s ease',
       }}
     >
       <div style={{
@@ -354,12 +355,39 @@ function SaucePill({ item }) {
           : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🫙</div>
         }
       </div>
-      <span style={{
-        fontFamily: 'var(--font-work-sans), sans-serif',
-        fontSize: 13, fontWeight: 600, color: '#444',
-      }}>
-        {item.name}
-      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <span style={{
+          fontFamily: 'var(--font-work-sans), sans-serif',
+          fontSize: 13, fontWeight: 600, color: '#444', display: 'block',
+        }}>
+          {item.name}
+        </span>
+        {item.price != null && (
+          <span style={{ fontSize: 12, color: '#E4002B', fontWeight: 700 }}>
+            ${Number(item.price).toFixed(2)}
+          </span>
+        )}
+      </div>
+      {item.price != null && (
+        <button
+          onMouseDown={() => setPressed(true)}
+          onMouseUp={() => setPressed(false)}
+          onMouseLeave={() => setPressed(false)}
+          onClick={() => onAdd(item.name, item.price, '')}
+          style={{
+            width: 30, height: 30, borderRadius: 9, flexShrink: 0,
+            background: pressed ? '#C8001F' : '#E4002B',
+            border: 'none', color: '#fff',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer',
+            boxShadow: pressed ? 'none' : '0 3px 8px rgba(228,0,43,0.30)',
+            transform: pressed ? 'scale(0.88)' : 'scale(1)',
+            transition: 'all 0.12s ease',
+          }}
+        >
+          <PlusIcon size={13} />
+        </button>
+      )}
     </div>
   );
 }
@@ -692,10 +720,27 @@ export default function MenuPreview({ categories }) {
           from { opacity: 0; }
           to   { opacity: 1; }
         }
+        /* Tab strip: hidden scrollbar on mobile, thin visible one on desktop */
+        .tab-strip {
+          -webkit-overflow-scrolling: touch;
+          overflow-x: auto;
+          scrollbar-width: none;
+        }
+        .tab-strip::-webkit-scrollbar { display: none; }
+        @media (min-width: 768px) {
+          .tab-strip { scrollbar-width: thin; scrollbar-color: #E5E5E5 transparent; }
+          .tab-strip::-webkit-scrollbar { display: block; height: 3px; }
+          .tab-strip::-webkit-scrollbar-track { background: transparent; }
+          .tab-strip::-webkit-scrollbar-thumb { background: #E0E0E0; border-radius: 2px; }
+        }
+        /* keep hide-scrollbar for any other uses */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { scrollbar-width: none; }
 
         .tab-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
           padding: 11px 16px;
           font-size: 13px;
           font-weight: 500;
@@ -756,13 +801,13 @@ export default function MenuPreview({ categories }) {
 
         /* Responsive padding */
         .menu-content {
-          padding: 0 16px 140px;
+          padding: 0 16px 40px;
         }
         @media (min-width: 480px) {
-          .menu-content { padding: 0 20px 140px; }
+          .menu-content { padding: 0 20px 40px; }
         }
         @media (min-width: 768px) {
-          .menu-content { padding: 0 28px 140px; }
+          .menu-content { padding: 0 28px 40px; }
         }
 
         .header-inner {
@@ -866,8 +911,8 @@ export default function MenuPreview({ categories }) {
               </div>
             )}
 
-            {/* Category tab strip */}
-            <div ref={catStripRef} className="hide-scrollbar" style={{ display: 'flex', overflowX: 'auto' }}>
+            {/* Category tab strip — sauces excluded (shown in content under All) */}
+            <div ref={catStripRef} className="tab-strip" style={{ display: 'flex' }}>
               <button
                 className={`tab-btn${!activeCategory ? ' active' : ''}`}
                 onClick={() => {
@@ -879,7 +924,7 @@ export default function MenuPreview({ categories }) {
               >
                 All
               </button>
-              {categories.map((cat) => (
+              {categories.filter((c) => c.layout !== 'sauce').map((cat) => (
                 <button
                   key={cat.id}
                   id={`cat-btn-${cat.id}`}
@@ -891,6 +936,16 @@ export default function MenuPreview({ categories }) {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                 >
+                  {cat.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={cat.imageUrl}
+                      alt=""
+                      style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: 15, lineHeight: 1 }}>{CAT_ICONS[cat.id] || '🍽️'}</span>
+                  )}
                   {cat.name}
                 </button>
               ))}
@@ -899,7 +954,7 @@ export default function MenuPreview({ categories }) {
         </div>
 
         {/* ── Content ──────────────────────────────────────────────────────── */}
-        <div className="menu-content">
+        <div className="menu-content" style={totalItems > 0 ? { paddingBottom: 100 } : undefined}>
 
           {/* ── Search results mode ────────────────────────────────────────── */}
           {searchQuery.trim() && (() => {
@@ -1022,7 +1077,7 @@ export default function MenuPreview({ categories }) {
               {cat.layout === 'sauce' && (
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                   {cat.items.map((item) => (
-                    <SaucePill key={item.id} item={item} />
+                    <SaucePill key={item.id} item={item} onAdd={addToCart} />
                   ))}
                 </div>
               )}
