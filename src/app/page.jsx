@@ -2,6 +2,8 @@ import prisma from '@/lib/prisma';
 import Footer from '@/components/public/Footer';
 import MenuPreview from '@/components/public/MenuPreview';
 
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage() {
   const [categories, socialLinks] = await Promise.all([
     prisma.category.findMany({
