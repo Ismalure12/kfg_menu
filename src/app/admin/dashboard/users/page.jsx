@@ -1,36 +1,96 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 export default function UsersPage() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [currentUserId, setCurrentUserId] = useState(null);
-  const [accessDenied, setAccessDenied] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ email: '', password: '', role: 'user' });
   const [formError, setFormError] = useState('');
 
-  const loadUsers = useCallback(async () => {
-    const res = await fetch('/api/users');
-    if (res.status === 403) {
-      setAccessDenied(true);
-      setLoading(false);
-      return;
-    }
-    const data = await res.json();
-    setUsers(Array.isArray(data) ? data : []);
-    setLoading(false);
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((r) => r.json())
+      .then((d) => { if (d.userId) setCurrentUserId(d.userId); })
+      .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    // Get current user ID from session
-    fetch('/api/auth/me').then(r => r.json()).then(d => {
-      if (d.userId) setCurrentUserId(d.userId);
-    }).catch(() => {});
-    loadUsers();
-  }, [loadUsers]);
+  // ── Data fetching ──────────────────────────────────────────────────────────
+  const { data, isLoading } = useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const res = await fetch('/api/users');
+      if (res.status === 403) return { denied: true, users: [] };
+      if (!res.ok) throw new Error('Failed to load users');
+      const users = await res.json();
+      return { denied: false, users: Array.isArray(users) ? users : [] };
+    },
+    onError: (err) => {
+      console.error('[users] load error:', err);
+      toast.error('Failed to load users');
+    },
+  });
+
+  const accessDenied = data?.denied ?? false;
+  const users = data?.users ?? [];
+
+  // ── Save mutation ──────────────────────────────────────────────────────────
+  const saveMutation = useMutation({
+    mutationFn: async (payload) => {
+      const res = await fetch(
+        editingId ? `/api/users/${editingId}` : '/api/users',
+        {
+          method: editingId ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }
+      );
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
+      return res.json();
+    },
+    onMutate: () => {
+      toast.loading(editingId ? 'Updating user…' : 'Creating user…', { id: 'user-save' });
+    },
+    onSuccess: () => {
+      toast.success(editingId ? 'User updated' : 'User created', { id: 'user-save' });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      resetForm();
+    },
+    onError: (err) => {
+      console.error('[users] save error:', err);
+      toast.dismiss('user-save');
+      setFormError(err.message || 'Something went wrong');
+    },
+  });
+
+  // ── Delete mutation ────────────────────────────────────────────────────────
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      const res = await fetch(`/api/users/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Delete failed');
+      }
+    },
+    onMutate: () => {
+      toast.loading('Deleting user…', { id: 'user-delete' });
+    },
+    onSuccess: () => {
+      toast.success('User deleted', { id: 'user-delete' });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+    onError: (err) => {
+      console.error('[users] delete error:', err);
+      toast.error(err.message || 'Delete failed', { id: 'user-delete' });
+    },
+  });
 
   const resetForm = () => {
     setForm({ email: '', password: '', role: 'user' });
@@ -39,41 +99,18 @@ export default function UsersPage() {
     setFormError('');
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setFormError('');
-
     if (editingId) {
-      const payload = { email: form.email, role: form.role };
-      const res = await fetch(`/api/users/${editingId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        setFormError(data.error || 'Update failed');
-        return;
-      }
+      saveMutation.mutate({ email: form.email, role: form.role });
     } else {
       if (!form.password || form.password.length < 6) {
         setFormError('Password must be at least 6 characters');
         return;
       }
-      const res = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        setFormError(data.error || 'Create failed');
-        return;
-      }
+      saveMutation.mutate(form);
     }
-
-    resetForm();
-    loadUsers();
   };
 
   const handleEdit = (user) => {
@@ -83,18 +120,14 @@ export default function UsersPage() {
     setFormError('');
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = (id) => {
     if (!confirm('Delete this user?')) return;
-    const res = await fetch(`/api/users/${id}`, { method: 'DELETE' });
-    if (!res.ok) {
-      const data = await res.json();
-      alert(data.error || 'Delete failed');
-      return;
-    }
-    loadUsers();
+    deleteMutation.mutate(id);
   };
 
-  if (accessDenied) {
+  const isSaving = saveMutation.isPending;
+
+  if (!isLoading && accessDenied) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
@@ -136,6 +169,7 @@ export default function UsersPage() {
               </h2>
               <button
                 onClick={resetForm}
+                disabled={isSaving}
                 className="flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
                 style={{ width: '32px', height: '32px' }}
               >
@@ -155,7 +189,7 @@ export default function UsersPage() {
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   required
                   className="w-full border rounded-lg px-3 py-2 text-sm"
-                  style={{ borderColor: '#E5E5E5' }}
+                  style={{ borderColor: '#E5E5E5', fontSize: '16px' }}
                 />
               </div>
               {!editingId && (
@@ -168,7 +202,7 @@ export default function UsersPage() {
                     required
                     minLength={6}
                     className="w-full border rounded-lg px-3 py-2 text-sm"
-                    style={{ borderColor: '#E5E5E5' }}
+                    style={{ borderColor: '#E5E5E5', fontSize: '16px' }}
                     placeholder="Min 6 characters"
                   />
                 </div>
@@ -179,18 +213,36 @@ export default function UsersPage() {
                   value={form.role}
                   onChange={(e) => setForm({ ...form, role: e.target.value })}
                   className="w-full border rounded-lg px-3 py-2 text-sm"
-                  style={{ borderColor: '#E5E5E5' }}
+                  style={{ borderColor: '#E5E5E5', fontSize: '16px' }}
                 >
                   <option value="user">User</option>
                   <option value="admin">Admin</option>
                 </select>
               </div>
-              {formError && <p className="text-sm text-red-600">{formError}</p>}
+              {formError && (
+                <div className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{formError}</div>
+              )}
               <div className="flex gap-2 pt-2">
-                <button type="submit" className="px-4 py-2 rounded-lg text-white text-sm font-medium" style={{ backgroundColor: '#E4002B' }}>
-                  {editingId ? 'Update' : 'Create'}
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="px-4 py-2 rounded-lg text-white text-sm font-medium disabled:opacity-60 flex items-center gap-2"
+                  style={{ backgroundColor: '#E4002B' }}
+                >
+                  {isSaving && (
+                    <svg className="animate-spin" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    </svg>
+                  )}
+                  {isSaving ? (editingId ? 'Updating…' : 'Creating…') : (editingId ? 'Update' : 'Create')}
                 </button>
-                <button type="button" onClick={resetForm} className="px-4 py-2 rounded-lg text-sm font-medium border" style={{ borderColor: '#E5E5E5' }}>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  disabled={isSaving}
+                  className="px-4 py-2 rounded-lg text-sm font-medium border disabled:opacity-60"
+                  style={{ borderColor: '#E5E5E5' }}
+                >
                   Cancel
                 </button>
               </div>
@@ -200,7 +252,7 @@ export default function UsersPage() {
       )}
 
       {/* Loading skeleton */}
-      {loading && (
+      {isLoading && (
         <>
           <div className="hidden md:block bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
             {Array.from({ length: 3 }).map((_, i) => (
@@ -236,7 +288,7 @@ export default function UsersPage() {
       )}
 
       {/* Desktop table */}
-      {!loading && !accessDenied && (
+      {!isLoading && !accessDenied && (
         <div className="hidden md:block bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
           <table className="w-full text-sm">
             <thead>
@@ -273,7 +325,13 @@ export default function UsersPage() {
                   <td className="px-4 py-3 text-right">
                     <button onClick={() => handleEdit(user)} className="text-blue-600 hover:underline text-xs mr-3">Edit</button>
                     {user.id !== currentUserId && (
-                      <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:underline text-xs">Delete</button>
+                      <button
+                        onClick={() => handleDelete(user.id)}
+                        disabled={deleteMutation.isPending}
+                        className="text-red-600 hover:underline text-xs disabled:opacity-60"
+                      >
+                        Delete
+                      </button>
                     )}
                   </td>
                 </tr>
@@ -287,7 +345,7 @@ export default function UsersPage() {
       )}
 
       {/* Mobile cards */}
-      {!loading && !accessDenied && (
+      {!isLoading && !accessDenied && (
         <div className="md:hidden space-y-3">
           {users.map((user) => (
             <div key={user.id} className="bg-white rounded-lg border p-4" style={{ borderColor: '#E5E5E5' }}>
@@ -314,7 +372,13 @@ export default function UsersPage() {
               <div className="flex gap-3 border-t pt-3" style={{ borderColor: '#E5E5E5' }}>
                 <button onClick={() => handleEdit(user)} className="text-blue-600 text-xs font-medium">Edit</button>
                 {user.id !== currentUserId && (
-                  <button onClick={() => handleDelete(user.id)} className="text-red-600 text-xs font-medium">Delete</button>
+                  <button
+                    onClick={() => handleDelete(user.id)}
+                    disabled={deleteMutation.isPending}
+                    className="text-red-600 text-xs font-medium disabled:opacity-60"
+                  >
+                    Delete
+                  </button>
                 )}
               </div>
             </div>

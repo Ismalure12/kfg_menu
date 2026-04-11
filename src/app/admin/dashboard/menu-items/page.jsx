@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 export default function MenuItemsPage() {
-  const [items, setItems] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [filterCategoryId, setFilterCategoryId] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -20,25 +20,164 @@ export default function MenuItemsPage() {
   const [editingSubId, setEditingSubId] = useState(null);
   const [showSubForm, setShowSubForm] = useState(false);
 
-  const loadData = useCallback(async () => {
-    const [catRes, itemRes] = await Promise.all([
-      fetch('/api/categories'),
-      fetch(`/api/menu-items${filterCategoryId ? `?categoryId=${filterCategoryId}` : ''}`),
-    ]);
-    const cats = await catRes.json();
-    const itms = await itemRes.json();
-    setCategories(Array.isArray(cats) ? cats : []);
-    setItems(Array.isArray(itms) ? itms : []);
-    setLoading(false);
-  }, [filterCategoryId]);
+  // ── Data fetching ──────────────────────────────────────────────────────────
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const res = await fetch('/api/categories');
+      if (!res.ok) throw new Error('Failed to load categories');
+      return res.json();
+    },
+    onError: (err) => {
+      console.error('[menu-items] categories load error:', err);
+      toast.error('Failed to load categories');
+    },
+  });
 
-  useEffect(() => { loadData(); }, [loadData]);
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ['menu-items', filterCategoryId],
+    queryFn: async () => {
+      const url = filterCategoryId ? `/api/menu-items?categoryId=${filterCategoryId}` : '/api/menu-items';
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to load menu items');
+      return res.json();
+    },
+    onError: (err) => {
+      console.error('[menu-items] load error:', err);
+      toast.error('Failed to load menu items');
+    },
+  });
 
   const loadSubItems = async (menuItemId) => {
-    const res = await fetch(`/api/sub-items?menuItemId=${menuItemId}`);
-    const data = await res.json();
-    setSubItems(Array.isArray(data) ? data : []);
+    try {
+      const res = await fetch(`/api/sub-items?menuItemId=${menuItemId}`);
+      const data = await res.json();
+      setSubItems(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('[menu-items] sub-items load error:', err);
+      toast.error('Failed to load sub-items');
+    }
   };
+
+  // ── Save item mutation ─────────────────────────────────────────────────────
+  const saveMutation = useMutation({
+    mutationFn: async (payload) => {
+      const res = await fetch(
+        editingId ? `/api/menu-items/${editingId}` : '/api/menu-items',
+        {
+          method: editingId ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Request failed (${res.status})`);
+      }
+      return res.json();
+    },
+    onMutate: () => {
+      toast.loading(editingId ? 'Updating item…' : 'Creating item…', { id: 'item-save' });
+    },
+    onSuccess: () => {
+      toast.success(editingId ? 'Item updated' : 'Item created', { id: 'item-save' });
+      queryClient.invalidateQueries({ queryKey: ['menu-items'] });
+      resetForm();
+    },
+    onError: (err) => {
+      console.error('[menu-items] save error:', err);
+      toast.error(err.message || 'Something went wrong', { id: 'item-save' });
+    },
+  });
+
+  // ── Delete item mutation ───────────────────────────────────────────────────
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      const res = await fetch(`/api/menu-items/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Delete failed');
+    },
+    onMutate: () => {
+      toast.loading('Deleting item…', { id: 'item-delete' });
+    },
+    onSuccess: () => {
+      toast.success('Item deleted', { id: 'item-delete' });
+      queryClient.invalidateQueries({ queryKey: ['menu-items'] });
+    },
+    onError: (err) => {
+      console.error('[menu-items] delete error:', err);
+      toast.error(err.message || 'Delete failed', { id: 'item-delete' });
+    },
+  });
+
+  // ── Toggle active mutation ─────────────────────────────────────────────────
+  const toggleMutation = useMutation({
+    mutationFn: async ({ id, isActive }) => {
+      const res = await fetch(`/api/menu-items/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive }),
+      });
+      if (!res.ok) throw new Error('Toggle failed');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['menu-items'] });
+    },
+    onError: (err) => {
+      console.error('[menu-items] toggle error:', err);
+      toast.error(err.message || 'Toggle failed');
+    },
+  });
+
+  // ── Sub-item mutations ─────────────────────────────────────────────────────
+  const saveSubMutation = useMutation({
+    mutationFn: async (payload) => {
+      const res = await fetch(
+        editingSubId ? `/api/sub-items/${editingSubId}` : '/api/sub-items',
+        {
+          method: editingSubId ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Request failed (${res.status})`);
+      }
+      return res.json();
+    },
+    onMutate: () => {
+      toast.loading(editingSubId ? 'Updating variant…' : 'Adding variant…', { id: 'sub-save' });
+    },
+    onSuccess: () => {
+      toast.success(editingSubId ? 'Variant updated' : 'Variant added', { id: 'sub-save' });
+      resetSubForm();
+      loadSubItems(editingId);
+      queryClient.invalidateQueries({ queryKey: ['menu-items'] });
+    },
+    onError: (err) => {
+      console.error('[menu-items] sub save error:', err);
+      toast.error(err.message || 'Something went wrong', { id: 'sub-save' });
+    },
+  });
+
+  const deleteSubMutation = useMutation({
+    mutationFn: async (id) => {
+      const res = await fetch(`/api/sub-items/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Delete failed');
+    },
+    onMutate: () => {
+      toast.loading('Deleting variant…', { id: 'sub-delete' });
+    },
+    onSuccess: () => {
+      toast.success('Variant deleted', { id: 'sub-delete' });
+      loadSubItems(editingId);
+      queryClient.invalidateQueries({ queryKey: ['menu-items'] });
+    },
+    onError: (err) => {
+      console.error('[menu-items] sub delete error:', err);
+      toast.error(err.message || 'Delete failed', { id: 'sub-delete' });
+    },
+  });
 
   const resetSubForm = () => {
     setSubForm({ name: '', price: '', sortOrder: 0 });
@@ -60,24 +199,27 @@ export default function MenuItemsPage() {
     if (!file) return;
     setUploading(true);
     setImagePreview(URL.createObjectURL(file));
-
     const formData = new FormData();
     formData.append('file', file);
-
     try {
       const res = await fetch('/api/upload', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.url) {
         setForm((prev) => ({ ...prev, imageUrl: data.url }));
+        toast.success('Image uploaded');
+      } else {
+        throw new Error('No URL returned');
       }
-    } catch {
-      alert('Image upload failed');
+    } catch (err) {
+      console.error('[menu-items] upload error:', err);
+      toast.error('Image upload failed');
+      setImagePreview(null);
     } finally {
       setUploading(false);
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     const payload = {
       name: form.name,
@@ -88,23 +230,7 @@ export default function MenuItemsPage() {
       sortOrder: Number(form.sortOrder),
       isActive: form.isActive,
     };
-
-    if (editingId) {
-      await fetch(`/api/menu-items/${editingId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-    } else {
-      await fetch('/api/menu-items', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-    }
-
-    resetForm();
-    loadData();
+    saveMutation.mutate(payload);
   };
 
   const handleEdit = (item) => {
@@ -123,22 +249,16 @@ export default function MenuItemsPage() {
     loadSubItems(item.id);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = (id) => {
     if (!confirm('Delete this menu item?')) return;
-    await fetch(`/api/menu-items/${id}`, { method: 'DELETE' });
-    loadData();
+    deleteMutation.mutate(id);
   };
 
-  const handleToggleActive = async (item) => {
-    await fetch(`/api/menu-items/${item.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ isActive: !item.isActive }),
-    });
-    loadData();
+  const handleToggleActive = (item) => {
+    toggleMutation.mutate({ id: item.id, isActive: !item.isActive });
   };
 
-  const handleSubSubmit = async (e) => {
+  const handleSubSubmit = (e) => {
     e.preventDefault();
     const payload = {
       menuItemId: editingId,
@@ -146,24 +266,7 @@ export default function MenuItemsPage() {
       price: parseFloat(subForm.price),
       sortOrder: Number(subForm.sortOrder),
     };
-
-    if (editingSubId) {
-      await fetch(`/api/sub-items/${editingSubId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-    } else {
-      await fetch('/api/sub-items', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-    }
-
-    resetSubForm();
-    loadSubItems(editingId);
-    loadData();
+    saveSubMutation.mutate(payload);
   };
 
   const handleSubEdit = (sub) => {
@@ -172,12 +275,12 @@ export default function MenuItemsPage() {
     setShowSubForm(true);
   };
 
-  const handleSubDelete = async (id) => {
+  const handleSubDelete = (id) => {
     if (!confirm('Delete this sub-item?')) return;
-    await fetch(`/api/sub-items/${id}`, { method: 'DELETE' });
-    loadSubItems(editingId);
-    loadData();
+    deleteSubMutation.mutate(id);
   };
+
+  const isSaving = saveMutation.isPending;
 
   return (
     <div>
@@ -225,6 +328,7 @@ export default function MenuItemsPage() {
               </h2>
               <button
                 onClick={resetForm}
+                disabled={isSaving}
                 className="flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
                 style={{ width: '32px', height: '32px' }}
               >
@@ -246,7 +350,7 @@ export default function MenuItemsPage() {
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     required
                     className="w-full border rounded-lg px-3 py-2 text-sm"
-                    style={{ borderColor: '#E5E5E5' }}
+                    style={{ borderColor: '#E5E5E5', fontSize: '16px' }}
                   />
                 </div>
                 <div>
@@ -256,7 +360,7 @@ export default function MenuItemsPage() {
                     onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
                     required
                     className="w-full border rounded-lg px-3 py-2 text-sm"
-                    style={{ borderColor: '#E5E5E5' }}
+                    style={{ borderColor: '#E5E5E5', fontSize: '16px' }}
                   >
                     <option value="">Select category</option>
                     {categories.map((cat) => (
@@ -272,7 +376,7 @@ export default function MenuItemsPage() {
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   rows={2}
                   className="w-full border rounded-lg px-3 py-2 text-sm"
-                  style={{ borderColor: '#E5E5E5' }}
+                  style={{ borderColor: '#E5E5E5', fontSize: '16px' }}
                 />
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -286,7 +390,7 @@ export default function MenuItemsPage() {
                     onChange={(e) => setForm({ ...form, price: e.target.value })}
                     required
                     className="w-full border rounded-lg px-3 py-2 text-sm"
-                    style={{ borderColor: '#E5E5E5' }}
+                    style={{ borderColor: '#E5E5E5', fontSize: '16px' }}
                   />
                 </div>
                 <div>
@@ -296,7 +400,7 @@ export default function MenuItemsPage() {
                     value={form.sortOrder}
                     onChange={(e) => setForm({ ...form, sortOrder: e.target.value })}
                     className="w-full border rounded-lg px-3 py-2 text-sm"
-                    style={{ borderColor: '#E5E5E5' }}
+                    style={{ borderColor: '#E5E5E5', fontSize: '16px' }}
                   />
                 </div>
                 <div className="flex items-end pb-1 col-span-2 md:col-span-1">
@@ -329,10 +433,26 @@ export default function MenuItemsPage() {
 
               {/* Modal footer */}
               <div className="flex gap-2 pt-2">
-                <button type="submit" disabled={uploading} className="px-4 py-2 rounded-lg text-white text-sm font-medium disabled:opacity-50" style={{ backgroundColor: '#E4002B' }}>
-                  {editingId ? 'Update' : 'Create'}
+                <button
+                  type="submit"
+                  disabled={isSaving || uploading}
+                  className="px-4 py-2 rounded-lg text-white text-sm font-medium disabled:opacity-60 flex items-center gap-2"
+                  style={{ backgroundColor: '#E4002B' }}
+                >
+                  {isSaving && (
+                    <svg className="animate-spin" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    </svg>
+                  )}
+                  {isSaving ? (editingId ? 'Updating…' : 'Creating…') : (editingId ? 'Update' : 'Create')}
                 </button>
-                <button type="button" onClick={resetForm} className="px-4 py-2 rounded-lg text-sm font-medium border" style={{ borderColor: '#E5E5E5' }}>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  disabled={isSaving}
+                  className="px-4 py-2 rounded-lg text-sm font-medium border disabled:opacity-60"
+                  style={{ borderColor: '#E5E5E5' }}
+                >
                   Cancel
                 </button>
               </div>
@@ -366,7 +486,7 @@ export default function MenuItemsPage() {
                       onChange={(e) => setSubForm({ ...subForm, name: e.target.value })}
                       required
                       className="flex-1 min-w-[120px] border rounded-lg px-3 py-1.5 text-sm"
-                      style={{ borderColor: '#E5E5E5' }}
+                      style={{ borderColor: '#E5E5E5', fontSize: '16px' }}
                     />
                     <input
                       type="number"
@@ -377,7 +497,7 @@ export default function MenuItemsPage() {
                       onChange={(e) => setSubForm({ ...subForm, price: e.target.value })}
                       required
                       className="w-24 border rounded-lg px-3 py-1.5 text-sm"
-                      style={{ borderColor: '#E5E5E5' }}
+                      style={{ borderColor: '#E5E5E5', fontSize: '16px' }}
                     />
                     <input
                       type="number"
@@ -385,9 +505,19 @@ export default function MenuItemsPage() {
                       value={subForm.sortOrder}
                       onChange={(e) => setSubForm({ ...subForm, sortOrder: e.target.value })}
                       className="w-16 border rounded-lg px-2 py-1.5 text-sm"
-                      style={{ borderColor: '#E5E5E5' }}
+                      style={{ borderColor: '#E5E5E5', fontSize: '16px' }}
                     />
-                    <button type="submit" className="px-3 py-1.5 rounded-lg text-white text-xs font-medium" style={{ backgroundColor: '#E4002B' }}>
+                    <button
+                      type="submit"
+                      disabled={saveSubMutation.isPending}
+                      className="px-3 py-1.5 rounded-lg text-white text-xs font-medium disabled:opacity-60 flex items-center gap-1"
+                      style={{ backgroundColor: '#E4002B' }}
+                    >
+                      {saveSubMutation.isPending && (
+                        <svg className="animate-spin" width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                        </svg>
+                      )}
                       {editingSubId ? 'Update' : 'Add'}
                     </button>
                     <button type="button" onClick={resetSubForm} className="px-3 py-1.5 rounded-lg text-xs font-medium border" style={{ borderColor: '#E5E5E5' }}>
@@ -408,7 +538,13 @@ export default function MenuItemsPage() {
                         <div className="flex items-center gap-3">
                           <span className="font-medium" style={{ color: '#E4002B' }}>${parseFloat(sub.price).toFixed(2)}</span>
                           <button onClick={() => handleSubEdit(sub)} className="text-blue-600 text-xs">Edit</button>
-                          <button onClick={() => handleSubDelete(sub.id)} className="text-red-600 text-xs">Delete</button>
+                          <button
+                            onClick={() => handleSubDelete(sub.id)}
+                            disabled={deleteSubMutation.isPending}
+                            className="text-red-600 text-xs disabled:opacity-60"
+                          >
+                            Delete
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -423,7 +559,7 @@ export default function MenuItemsPage() {
       )}
 
       {/* Loading skeleton */}
-      {loading && (
+      {isLoading && (
         <>
           <div className="hidden md:block bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
             {Array.from({ length: 6 }).map((_, i) => (
@@ -472,118 +608,135 @@ export default function MenuItemsPage() {
       )}
 
       {/* Desktop table */}
-      {!loading && <div className="hidden md:block bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b" style={{ borderColor: '#E5E5E5', backgroundColor: '#F9FAFB' }}>
-              <th className="text-left px-4 py-3 font-medium">Name</th>
-              <th className="text-left px-4 py-3 font-medium">Category</th>
-              <th className="text-left px-4 py-3 font-medium">Price</th>
-              <th className="text-left px-4 py-3 font-medium">Order</th>
-              <th className="text-left px-4 py-3 font-medium">Active</th>
-              <th className="text-right px-4 py-3 font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr key={item.id} className="border-b last:border-0" style={{ borderColor: '#E5E5E5' }}>
-                <td className="px-4 py-3 font-medium">
-                  <div className="flex items-center gap-2">
-                    {item.imageUrl && (
-                      <Image src={item.imageUrl} alt="" width={32} height={32} className="rounded object-cover" style={{ width: '32px', height: '32px' }} />
-                    )}
-                    {item.name}
-                    {item.subItems?.length > 0 && (
-                      <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{ backgroundColor: '#FFF0F0', color: '#E4002B' }}>
-                        {item.subItems.length} var
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-gray-500">{item.category?.name}</td>
-                <td className="px-4 py-3">${parseFloat(item.price).toFixed(2)}</td>
-                <td className="px-4 py-3">{item.sortOrder}</td>
-                <td className="px-4 py-3">
-                  <button
-                    onClick={() => handleToggleActive(item)}
-                    className="text-xs px-2 py-1 rounded-full font-medium"
-                    style={{
-                      backgroundColor: item.isActive ? '#DEF7EC' : '#FDE8E8',
-                      color: item.isActive ? '#03543F' : '#9B1C1C',
-                    }}
-                  >
-                    {item.isActive ? 'Active' : 'Inactive'}
-                  </button>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <button onClick={() => handleEdit(item)} className="text-blue-600 hover:underline text-xs mr-3">Edit</button>
-                  <button onClick={() => handleDelete(item.id)} className="text-red-600 hover:underline text-xs">Delete</button>
-                </td>
+      {!isLoading && (
+        <div className="hidden md:block bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b" style={{ borderColor: '#E5E5E5', backgroundColor: '#F9FAFB' }}>
+                <th className="text-left px-4 py-3 font-medium">Name</th>
+                <th className="text-left px-4 py-3 font-medium">Category</th>
+                <th className="text-left px-4 py-3 font-medium">Price</th>
+                <th className="text-left px-4 py-3 font-medium">Order</th>
+                <th className="text-left px-4 py-3 font-medium">Active</th>
+                <th className="text-right px-4 py-3 font-medium">Actions</th>
               </tr>
-            ))}
-            {items.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">No menu items yet</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>}
+            </thead>
+            <tbody>
+              {items.map((item) => (
+                <tr key={item.id} className="border-b last:border-0" style={{ borderColor: '#E5E5E5' }}>
+                  <td className="px-4 py-3 font-medium">
+                    <div className="flex items-center gap-2">
+                      {item.imageUrl && (
+                        <Image src={item.imageUrl} alt="" width={32} height={32} className="rounded object-cover" style={{ width: '32px', height: '32px' }} />
+                      )}
+                      {item.name}
+                      {item.subItems?.length > 0 && (
+                        <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{ backgroundColor: '#FFF0F0', color: '#E4002B' }}>
+                          {item.subItems.length} var
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-gray-500">{item.category?.name}</td>
+                  <td className="px-4 py-3">${parseFloat(item.price).toFixed(2)}</td>
+                  <td className="px-4 py-3">{item.sortOrder}</td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => handleToggleActive(item)}
+                      disabled={toggleMutation.isPending}
+                      className="text-xs px-2 py-1 rounded-full font-medium disabled:opacity-60"
+                      style={{
+                        backgroundColor: item.isActive ? '#DEF7EC' : '#FDE8E8',
+                        color: item.isActive ? '#03543F' : '#9B1C1C',
+                      }}
+                    >
+                      {item.isActive ? 'Active' : 'Inactive'}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button onClick={() => handleEdit(item)} className="text-blue-600 hover:underline text-xs mr-3">Edit</button>
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      disabled={deleteMutation.isPending}
+                      className="text-red-600 hover:underline text-xs disabled:opacity-60"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {items.length === 0 && (
+                <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">No menu items yet</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Mobile cards */}
-      {!loading && <div className="md:hidden space-y-3">
-        {items.map((item) => (
-          <div key={item.id} className="bg-white rounded-lg border p-3" style={{ borderColor: '#E5E5E5' }}>
-            <div className="flex gap-3">
-              {/* Thumbnail */}
-              {item.imageUrl && (
-                <Image
-                  src={item.imageUrl}
-                  alt={item.name}
-                  width={64}
-                  height={64}
-                  className="rounded-lg object-cover shrink-0"
-                  style={{ width: '64px', height: '64px' }}
-                />
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="font-medium text-sm truncate" style={{ color: '#1A1A1A' }}>{item.name}</h3>
-                    {item.subItems?.length > 0 && (
-                      <span className="text-xs px-1.5 py-0.5 rounded-full font-medium shrink-0" style={{ backgroundColor: '#FFF0F0', color: '#E4002B' }}>
-                        {item.subItems.length}
-                      </span>
-                    )}
+      {!isLoading && (
+        <div className="md:hidden space-y-3">
+          {items.map((item) => (
+            <div key={item.id} className="bg-white rounded-lg border p-3" style={{ borderColor: '#E5E5E5' }}>
+              <div className="flex gap-3">
+                {item.imageUrl && (
+                  <Image
+                    src={item.imageUrl}
+                    alt={item.name}
+                    width={64}
+                    height={64}
+                    className="rounded-lg object-cover shrink-0"
+                    style={{ width: '64px', height: '64px' }}
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="font-medium text-sm truncate" style={{ color: '#1A1A1A' }}>{item.name}</h3>
+                      {item.subItems?.length > 0 && (
+                        <span className="text-xs px-1.5 py-0.5 rounded-full font-medium shrink-0" style={{ backgroundColor: '#FFF0F0', color: '#E4002B' }}>
+                          {item.subItems.length}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => handleToggleActive(item)}
+                      disabled={toggleMutation.isPending}
+                      className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0 disabled:opacity-60"
+                      style={{
+                        backgroundColor: item.isActive ? '#DEF7EC' : '#FDE8E8',
+                        color: item.isActive ? '#03543F' : '#9B1C1C',
+                      }}
+                    >
+                      {item.isActive ? 'Active' : 'Inactive'}
+                    </button>
                   </div>
-                  <button
-                    onClick={() => handleToggleActive(item)}
-                    className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0"
-                    style={{
-                      backgroundColor: item.isActive ? '#DEF7EC' : '#FDE8E8',
-                      color: item.isActive ? '#03543F' : '#9B1C1C',
-                    }}
-                  >
-                    {item.isActive ? 'Active' : 'Inactive'}
-                  </button>
-                </div>
-                <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                  <span>{item.category?.name}</span>
-                  <span className="font-medium" style={{ color: '#E4002B' }}>${parseFloat(item.price).toFixed(2)}</span>
-                  <span>Order: {item.sortOrder}</span>
+                  <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                    <span>{item.category?.name}</span>
+                    <span className="font-medium" style={{ color: '#E4002B' }}>${parseFloat(item.price).toFixed(2)}</span>
+                    <span>Order: {item.sortOrder}</span>
+                  </div>
                 </div>
               </div>
+              <div className="flex gap-3 border-t pt-2 mt-2" style={{ borderColor: '#E5E5E5' }}>
+                <button onClick={() => handleEdit(item)} className="text-blue-600 text-xs font-medium">Edit</button>
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  disabled={deleteMutation.isPending}
+                  className="text-red-600 text-xs font-medium disabled:opacity-60"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-            <div className="flex gap-3 border-t pt-2 mt-2" style={{ borderColor: '#E5E5E5' }}>
-              <button onClick={() => handleEdit(item)} className="text-blue-600 text-xs font-medium">Edit</button>
-              <button onClick={() => handleDelete(item.id)} className="text-red-600 text-xs font-medium">Delete</button>
+          ))}
+          {items.length === 0 && (
+            <div className="bg-white rounded-lg border p-8 text-center text-gray-400 text-sm" style={{ borderColor: '#E5E5E5' }}>
+              No menu items yet
             </div>
-          </div>
-        ))}
-        {items.length === 0 && (
-          <div className="bg-white rounded-lg border p-8 text-center text-gray-400 text-sm" style={{ borderColor: '#E5E5E5' }}>
-            No menu items yet
-          </div>
-        )}
-      </div>}
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -2,7 +2,8 @@ import prisma from '@/lib/prisma';
 import Footer from '@/components/public/Footer';
 import MenuPreview from '@/components/public/MenuPreview';
 
-export const dynamic = 'force-dynamic';
+// Revalidate every 5 minutes — ISR: first request after expiry refreshes cache for all users
+export const revalidate = 300;
 
 export default async function HomePage() {
   const [categories, socialLinks] = await Promise.all([

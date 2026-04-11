@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import AdminProviders from '@/app/admin/providers';
 
 const navItems = [
   { label: 'Overview', href: '/admin/dashboard', icon: (
@@ -32,7 +33,7 @@ const navItems = [
   )},
 ];
 
-export default function DashboardLayout({ children }) {
+function DashboardLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -123,5 +124,13 @@ export default function DashboardLayout({ children }) {
         <main className="flex-1 p-4 md:p-6 overflow-auto min-h-screen">{children}</main>
       </div>
     </div>
+  );
+}
+
+export default function DashboardLayoutWithProviders({ children }) {
+  return (
+    <AdminProviders>
+      <DashboardLayout>{children}</DashboardLayout>
+    </AdminProviders>
   );
 }

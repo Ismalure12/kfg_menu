@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 const PLATFORMS = [
   { value: 'phone', label: 'Phone', icon: (
@@ -45,96 +47,114 @@ function getPlatformInfo(platform) {
 }
 
 export default function SocialLinksPage() {
-  const [links, setLinks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ platform: '', value: '' });
-  const [error, setError] = useState('');
 
-  const loadLinks = useCallback(async () => {
-    const res = await fetch('/api/social-links');
-    const data = await res.json();
-    setLinks(Array.isArray(data) ? data : []);
-    setLoading(false);
-  }, []);
-
-  useEffect(() => { loadLinks(); }, [loadLinks]);
+  // ── Data fetching ──────────────────────────────────────────────────────────
+  const { data: links = [], isLoading } = useQuery({
+    queryKey: ['social-links'],
+    queryFn: async () => {
+      const res = await fetch('/api/social-links');
+      if (!res.ok) throw new Error('Failed to load social links');
+      return res.json();
+    },
+    onError: (err) => {
+      console.error('[social-links] load error:', err);
+      toast.error('Failed to load social links');
+    },
+  });
 
   const usedPlatforms = links.map((l) => l.platform);
   const availablePlatforms = PLATFORMS.filter((p) => !usedPlatforms.includes(p.value));
+
+  // ── Save mutation ──────────────────────────────────────────────────────────
+  const saveMutation = useMutation({
+    mutationFn: async (payload) => {
+      const res = await fetch(
+        editingId ? `/api/social-links/${editingId}` : '/api/social-links',
+        {
+          method: editingId ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(editingId ? { value: payload.value } : payload),
+        }
+      );
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
+      return res.json();
+    },
+    onMutate: () => {
+      toast.loading(editingId ? 'Updating link…' : 'Adding link…', { id: 'link-save' });
+    },
+    onSuccess: () => {
+      toast.success(editingId ? 'Link updated' : 'Link added', { id: 'link-save' });
+      queryClient.invalidateQueries({ queryKey: ['social-links'] });
+      resetForm();
+    },
+    onError: (err) => {
+      console.error('[social-links] save error:', err);
+      toast.error(err.message || 'Something went wrong', { id: 'link-save' });
+    },
+  });
+
+  // ── Delete mutation ────────────────────────────────────────────────────────
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      const res = await fetch(`/api/social-links/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Delete failed');
+    },
+    onMutate: () => {
+      toast.loading('Deleting link…', { id: 'link-delete' });
+    },
+    onSuccess: () => {
+      toast.success('Link deleted', { id: 'link-delete' });
+      queryClient.invalidateQueries({ queryKey: ['social-links'] });
+    },
+    onError: (err) => {
+      console.error('[social-links] delete error:', err);
+      toast.error(err.message || 'Delete failed', { id: 'link-delete' });
+    },
+  });
 
   const resetForm = () => {
     setForm({ platform: '', value: '' });
     setEditingId(null);
     setShowForm(false);
-    setError('');
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setError('');
-
-    if (editingId) {
-      const res = await fetch(`/api/social-links/${editingId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ value: form.value }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || 'Failed to update');
-        return;
-      }
-    } else {
-      const res = await fetch('/api/social-links', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ platform: form.platform, value: form.value }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || 'Failed to create');
-        return;
-      }
-    }
-
-    resetForm();
-    loadLinks();
+    saveMutation.mutate({ platform: form.platform, value: form.value });
   };
 
   const handleEdit = (link) => {
     setForm({ platform: link.platform, value: link.value });
     setEditingId(link.id);
     setShowForm(true);
-    setError('');
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = (id) => {
     if (!confirm('Delete this social link?')) return;
-    await fetch(`/api/social-links/${id}`, { method: 'DELETE' });
-    loadLinks();
+    deleteMutation.mutate(id);
   };
 
   const getPlaceholder = (platform) => {
     switch (platform) {
       case 'phone':
-      case 'whatsapp':
-        return '+256 700 000 000';
-      case 'instagram':
-        return 'https://instagram.com/yourpage';
-      case 'facebook':
-        return 'https://facebook.com/yourpage';
-      case 'twitter':
-        return 'https://x.com/yourhandle';
-      case 'tiktok':
-        return 'https://tiktok.com/@yourhandle';
-      case 'website':
-        return 'https://yourwebsite.com';
-      default:
-        return 'Enter value';
+      case 'whatsapp': return '+256 700 000 000';
+      case 'instagram': return 'https://instagram.com/yourpage';
+      case 'facebook': return 'https://facebook.com/yourpage';
+      case 'twitter': return 'https://x.com/yourhandle';
+      case 'tiktok': return 'https://tiktok.com/@yourhandle';
+      case 'website': return 'https://yourwebsite.com';
+      default: return 'Enter value';
     }
   };
+
+  const isSaving = saveMutation.isPending;
 
   return (
     <div>
@@ -168,6 +188,7 @@ export default function SocialLinksPage() {
               </h2>
               <button
                 onClick={resetForm}
+                disabled={isSaving}
                 className="flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
                 style={{ width: '32px', height: '32px' }}
               >
@@ -179,10 +200,6 @@ export default function SocialLinksPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="px-5 py-4 space-y-3">
-              {error && (
-                <div className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</div>
-              )}
-
               {!editingId && (
                 <div>
                   <label className="block text-sm font-medium mb-1">Platform</label>
@@ -191,7 +208,7 @@ export default function SocialLinksPage() {
                     onChange={(e) => setForm({ ...form, platform: e.target.value })}
                     required
                     className="w-full border rounded-lg px-3 py-2 text-sm"
-                    style={{ borderColor: '#E5E5E5' }}
+                    style={{ borderColor: '#E5E5E5', fontSize: '16px' }}
                   >
                     <option value="">Select platform...</option>
                     {availablePlatforms.map((p) => (
@@ -222,15 +239,31 @@ export default function SocialLinksPage() {
                   required
                   placeholder={getPlaceholder(form.platform)}
                   className="w-full border rounded-lg px-3 py-2 text-sm"
-                  style={{ borderColor: '#E5E5E5' }}
+                  style={{ borderColor: '#E5E5E5', fontSize: '16px' }}
                 />
               </div>
 
               <div className="flex gap-2 pt-2">
-                <button type="submit" className="px-4 py-2 rounded-lg text-white text-sm font-medium" style={{ backgroundColor: '#E4002B' }}>
-                  {editingId ? 'Update' : 'Create'}
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="px-4 py-2 rounded-lg text-white text-sm font-medium disabled:opacity-60 flex items-center gap-2"
+                  style={{ backgroundColor: '#E4002B' }}
+                >
+                  {isSaving && (
+                    <svg className="animate-spin" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    </svg>
+                  )}
+                  {isSaving ? (editingId ? 'Updating…' : 'Adding…') : (editingId ? 'Update' : 'Add')}
                 </button>
-                <button type="button" onClick={resetForm} className="px-4 py-2 rounded-lg text-sm font-medium border" style={{ borderColor: '#E5E5E5' }}>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  disabled={isSaving}
+                  className="px-4 py-2 rounded-lg text-sm font-medium border disabled:opacity-60"
+                  style={{ borderColor: '#E5E5E5' }}
+                >
                   Cancel
                 </button>
               </div>
@@ -240,7 +273,7 @@ export default function SocialLinksPage() {
       )}
 
       {/* Loading skeleton */}
-      {loading && (
+      {isLoading && (
         <>
           <div className="hidden md:block bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
             {Array.from({ length: 4 }).map((_, i) => (
@@ -274,7 +307,7 @@ export default function SocialLinksPage() {
       )}
 
       {/* Desktop table */}
-      {!loading && (
+      {!isLoading && (
         <div className="hidden md:block bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E5E5E5' }}>
           <table className="w-full text-sm">
             <thead>
@@ -302,7 +335,13 @@ export default function SocialLinksPage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <button onClick={() => handleEdit(link)} className="text-blue-600 hover:underline text-xs mr-3">Edit</button>
-                      <button onClick={() => handleDelete(link.id)} className="text-red-600 hover:underline text-xs">Delete</button>
+                      <button
+                        onClick={() => handleDelete(link.id)}
+                        disabled={deleteMutation.isPending}
+                        className="text-red-600 hover:underline text-xs disabled:opacity-60"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 );
@@ -316,7 +355,7 @@ export default function SocialLinksPage() {
       )}
 
       {/* Mobile cards */}
-      {!loading && (
+      {!isLoading && (
         <div className="md:hidden space-y-3">
           {links.map((link) => {
             const info = getPlatformInfo(link.platform);
@@ -339,7 +378,13 @@ export default function SocialLinksPage() {
                 <p className="text-sm text-gray-600 mb-3 break-all">{link.value}</p>
                 <div className="flex gap-3 border-t pt-3" style={{ borderColor: '#E5E5E5' }}>
                   <button onClick={() => handleEdit(link)} className="text-blue-600 text-xs font-medium">Edit</button>
-                  <button onClick={() => handleDelete(link.id)} className="text-red-600 text-xs font-medium">Delete</button>
+                  <button
+                    onClick={() => handleDelete(link.id)}
+                    disabled={deleteMutation.isPending}
+                    className="text-red-600 text-xs font-medium disabled:opacity-60"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             );

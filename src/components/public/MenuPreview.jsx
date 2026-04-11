@@ -1020,7 +1020,27 @@ export default function MenuPreview({ categories }) {
             >
               {/* Section header */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                <span style={{ fontSize: 20 }}>{CAT_ICONS[cat.id] || '🍽️'}</span>
+                {/* Category sticker: uploaded image or emoji fallback */}
+                {cat.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={cat.imageUrl}
+                    alt=""
+                    style={{
+                      width: 36, height: 36, borderRadius: '50%',
+                      objectFit: 'cover', flexShrink: 0,
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                      border: '2px solid #fff',
+                    }}
+                  />
+                ) : (
+                  <span style={{
+                    fontSize: 26, lineHeight: 1, flexShrink: 0,
+                    filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))',
+                  }}>
+                    {CAT_ICONS[cat.id] || '🍽️'}
+                  </span>
+                )}
                 <h2 style={{
                   fontFamily: 'var(--font-oswald), sans-serif',
                   fontSize: 22, fontWeight: 700, color: '#1A1A1A',

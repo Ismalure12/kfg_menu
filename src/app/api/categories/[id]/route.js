@@ -25,6 +25,7 @@ export async function PUT(request, { params }) {
 
     return NextResponse.json(category);
   } catch (error) {
+    console.error('Error updating category:', error);
     if (error.code === 'P2025') {
       return NextResponse.json({ error: 'Category not found' }, { status: 404 });
     }

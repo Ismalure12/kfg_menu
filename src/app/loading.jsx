@@ -5,7 +5,6 @@ import Footer from '@/components/public/Footer';
 export default function Loading() {
   return (
     <>
-      <Header />
       <MenuSkeleton />
       <Footer />
     </>
