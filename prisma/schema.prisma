@@ -60,17 +60,42 @@ model SubItem {
   @@map("sub_items")
 }
 
-model CartItem {
-  id           Int      @id @default(autoincrement())
-  cartId       String   @map("cart_id")
-  itemName     String   @map("item_name")
-  variantLabel String?  @map("variant_label")
-  price        Decimal  @db.Decimal(10, 2)
-  quantity     Int      @default(1)
-  createdAt    DateTime @default(now()) @map("created_at")
+model Customer {
+  id        Int      @id @default(autoincrement())
+  phone     String   @unique
+  name      String
+  address   String
+  createdAt DateTime @default(now()) @map("created_at")
+  orders    Order[]
 
-  @@index([cartId])
-  @@map("cart_items")
+  @@map("customers")
+}
+
+model PaymentSession {
+  id        Int      @id @default(autoincrement())
+  reference String   @unique
+  phone     String
+  name      String
+  address   String
+  cartJson  Json     @map("cart_json")
+  amount    Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("payment_sessions")
+}
+
+model Order {
+  id         Int      @id @default(autoincrement())
+  customerId Int      @map("customer_id")
+  items      Json
+  total      Decimal  @db.Decimal(10, 2)
+  address    String
+  status     String   @default("confirmed")
+  reference  String   @unique
+  createdAt  DateTime @default(now()) @map("created_at")
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  @@map("orders")
 }
 
 model SocialLink {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
@@ -64,18 +65,6 @@ const CAT_ICONS = {
   burgers: '🍔', wraps: '🌯', 'box-master': '🥡',
   'nuggets-extras': '🍿', sauces: '🫙',
 };
-
-// ─── UUID helper ─────────────────────────────────────────────────────────────
-function getOrCreateCartId() {
-  let id = localStorage.getItem('kfg_cart_id');
-  if (!id) {
-    id = typeof crypto !== 'undefined' && crypto.randomUUID
-      ? crypto.randomUUID()
-      : `cart-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    localStorage.setItem('kfg_cart_id', id);
-  }
-  return id;
-}
 
 // ─── Placeholder ─────────────────────────────────────────────────────────────
 function Placeholder({ emoji = '🍽️' }) {
@@ -187,7 +176,7 @@ function GridCard({ item, onAdd, selectedVariants, setSelectedVariant }) {
             onClick={(e) => {
               e.stopPropagation();
               const label = item.variants ? item.variants[selIdx].label : '';
-              onAdd(item.name, price, label);
+              onAdd(item.name, price, label, item.imageUrl);
             }}
             style={{
               width: 38, height: 38, borderRadius: 12,
@@ -308,7 +297,7 @@ function ListRow({ item, onAdd, selectedVariants, setSelectedVariant, animDelay 
             onClick={(e) => {
               e.stopPropagation();
               const label = item.variants ? item.variants[selIdx].label : '';
-              onAdd(item.name, price, label);
+              onAdd(item.name, price, label, item.imageUrl);
             }}
             style={{
               width: 36, height: 36, borderRadius: 11,
@@ -373,7 +362,7 @@ function SaucePill({ item, onAdd }) {
           onMouseDown={() => setPressed(true)}
           onMouseUp={() => setPressed(false)}
           onMouseLeave={() => setPressed(false)}
-          onClick={() => onAdd(item.name, item.price, '')}
+          onClick={() => onAdd(item.name, item.price, '', item.imageUrl)}
           style={{
             width: 30, height: 30, borderRadius: 9, flexShrink: 0,
             background: pressed ? '#C8001F' : '#E4002B',
@@ -393,7 +382,7 @@ function SaucePill({ item, onAdd }) {
 }
 
 // ─── Cart Panel ───────────────────────────────────────────────────────────────
-function CartPanel({ cart, onClose, onRemove, onUpdateQty, cartTotal }) {
+function CartPanel({ cart, onClose, onRemove, onUpdateQty, cartTotal, onCheckout }) {
   const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
 
   return (
@@ -545,6 +534,21 @@ function CartPanel({ cart, onClose, onRemove, onUpdateQty, cartTotal }) {
             <span style={{ fontFamily: 'var(--font-oswald), sans-serif', fontSize: 20, fontWeight: 700, color: '#E4002B' }}>${cartTotal.toFixed(2)}</span>
           </div>
           <button
+            onClick={onCheckout}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              width: '100%', padding: '15px', borderRadius: 16, border: 'none',
+              background: 'linear-gradient(135deg, #E4002B 0%, #FF1A3C 100%)',
+              color: '#fff', cursor: 'pointer',
+              fontFamily: 'var(--font-oswald), sans-serif',
+              fontSize: 16, fontWeight: 700, letterSpacing: 0.3,
+              boxShadow: '0 6px 20px rgba(228,0,43,0.35)',
+              marginBottom: 10,
+            }}
+          >
+            Proceed to Checkout →
+          </button>
+          <button
             onClick={onClose}
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -566,8 +570,13 @@ function CartPanel({ cart, onClose, onRemove, onUpdateQty, cartTotal }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function MenuPreview({ categories }) {
+  const router = useRouter();
   const [activeCategory, setActiveCategory] = useState(null);
-  const [cart, setCart] = useState([]);       // { localId, id?, name, variant, price, quantity }
+  const [cart, setCart] = useState(() => {
+    if (typeof window === 'undefined') return [];
+    const saved = localStorage.getItem('kfg_cart');
+    return saved ? JSON.parse(saved) : [];
+  }); // { localId, name, variant, price, quantity }
   const [selectedVariants, setSelectedVariants] = useState({});
   const [cartOpen, setCartOpen] = useState(false);
   const [cartBump, setCartBump] = useState(false);
@@ -576,33 +585,17 @@ export default function MenuPreview({ categories }) {
   const catStripRef = useRef(null);
   const sectionRefs = useRef({});
 
-  // Init cartId + load persisted cart
+  // Sync to localStorage on every cart change
   useEffect(() => {
-    const id = getOrCreateCartId();
-    fetch(`/api/cart?cartId=${id}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setCart(data.map((i) => ({
-            localId: i.id,
-            id: i.id,
-            name: i.itemName,
-            variant: i.variantLabel || '',
-            price: parseFloat(i.price),
-            quantity: i.quantity,
-          })));
-        }
-      })
-      .catch(() => {});
-  }, []);
+    localStorage.setItem('kfg_cart', JSON.stringify(cart));
+  }, [cart]);
 
-  // Add to cart (optimistic + API)
-  const addToCart = useCallback(async (name, price, variant) => {
+  // Add to cart
+  const addToCart = useCallback((name, price, variant, imageUrl) => {
     const localId = Date.now() + Math.random();
-    const newItem = { localId, name, variant, price: parseFloat(price), quantity: 1 };
+    const newItem = { localId, name, variant, price: parseFloat(price), quantity: 1, imageUrl: imageUrl || null };
 
     setCart((prev) => {
-      // If same item+variant already in cart, increment qty
       const existing = prev.find((i) => i.name === name && i.variant === variant);
       if (existing) {
         return prev.map((i) =>
@@ -615,61 +608,23 @@ export default function MenuPreview({ categories }) {
     });
     setCartBump(true);
     setTimeout(() => setCartBump(false), 300);
-
-    // Persist to DB — always read cartId from localStorage, never from state
-    const cId = getOrCreateCartId();
-    const existing = cart.find((i) => i.name === name && i.variant === variant);
-    if (existing && existing.id) {
-      const newQty = existing.quantity + 1;
-      fetch(`/api/cart/${existing.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantity: newQty }),
-      }).catch(() => {});
-    } else {
-      fetch('/api/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cartId: cId, itemName: name, variantLabel: variant || null, price: parseFloat(price) }),
-      })
-        .then((r) => r.json())
-        .then((saved) => {
-          setCart((prev) =>
-            prev.map((i) =>
-              i.localId === localId ? { ...i, id: saved.id } : i
-            )
-          );
-        })
-        .catch(() => {});
-    }
-  }, [cart]);
+  }, []);
 
   // Remove from cart
   const removeFromCart = useCallback((localId) => {
-    const item = cart.find((i) => (i.localId ?? i.id) === localId);
     setCart((prev) => prev.filter((i) => (i.localId ?? i.id) !== localId));
-    if (item?.id) {
-      fetch(`/api/cart/${item.id}`, { method: 'DELETE' }).catch(() => {});
-    }
-  }, [cart]);
+  }, []);
 
   // Update qty in cart panel
   const updateQtyInCart = useCallback((localId, delta) => {
-    const item = cart.find((i) => (i.localId ?? i.id) === localId);
-    if (!item) return;
-    const newQty = item.quantity + delta;
-    if (newQty < 1) { removeFromCart(localId); return; }
-    setCart((prev) =>
-      prev.map((i) => (i.localId ?? i.id) === localId ? { ...i, quantity: newQty } : i)
-    );
-    if (item.id) {
-      fetch(`/api/cart/${item.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantity: newQty }),
-      }).catch(() => {});
-    }
-  }, [cart, removeFromCart]);
+    setCart((prev) => {
+      const item = prev.find((i) => (i.localId ?? i.id) === localId);
+      if (!item) return prev;
+      const newQty = item.quantity + delta;
+      if (newQty < 1) return prev.filter((i) => (i.localId ?? i.id) !== localId);
+      return prev.map((i) => (i.localId ?? i.id) === localId ? { ...i, quantity: newQty } : i);
+    });
+  }, []);
 
   const setSelectedVariant = (itemId, idx) =>
     setSelectedVariants((prev) => ({ ...prev, [itemId]: idx }));
@@ -1116,7 +1071,7 @@ export default function MenuPreview({ categories }) {
             animation: 'fadeSlideUp 0.3s ease',
           }}>
             <button
-              onClick={() => setCartOpen(true)}
+              onClick={() => router.push('/checkout')}
               style={{
                 width: '100%', padding: '15px 24px',
                 borderRadius: 16,
@@ -1165,6 +1120,7 @@ export default function MenuPreview({ categories }) {
           onRemove={removeFromCart}
           onUpdateQty={updateQtyInCart}
           cartTotal={cartTotal}
+          onCheckout={() => router.push('/checkout')}
         />
       )}
     </>
